@@ -20,10 +20,13 @@ gh repo create divyansh-ai-portfolio --private --source=. --remote=origin --push
 3. **Root Directory:** leave default (repo is already the Next app)
 4. Framework: Next.js (auto)
 5. **Environment Variables** (Production + Preview):
-   - `SARVAM_API_KEY` = your Sarvam key
+   - `SARVAM_API_KEY` = your Sarvam key (optional if Mongo cache is seeded)
+   - `MONGODB_URI` = your MongoDB Atlas connection string (**required** for quick-topic cache)
    - `SARVAM_MODEL` = `sarvam-105b` (optional)
    - `SARVAM_API_BASE_URL` = `https://api.sarvam.ai` (optional)
 6. Click **Deploy**
+
+Quick Topics (skills / projects / experience / …) are stored in MongoDB after the first answer — later clicks are instant and cost **0 Sarvam tokens**.
 
 ## 3) Custom domain: portfolio.divyanshraj.in
 

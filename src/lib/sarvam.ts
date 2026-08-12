@@ -1,4 +1,12 @@
 import { contextForIntent, type ResumeData } from "@/lib/resume-data";
+import { STATIC_QUICK_REPLIES } from "@/lib/quick-replies";
+import {
+  getCachedAnswer,
+  isCacheKey,
+  setCachedAnswer,
+  type CacheKey,
+} from "@/lib/response-cache";
+import { getMemoryCached, setMemoryCached } from "@/lib/seed-cache";
 
 const DEFAULT_CHAT_MODEL = "sarvam-105b";
 const DEPRECATED_CHAT_MODELS = new Set([
@@ -11,9 +19,7 @@ const DEPRECATED_CHAT_MODELS = new Set([
 const SYSTEM =
   "Speak as Divyansh Raj (1st person). Use ONLY the given facts. Be concise. No fluff.";
 
-const HIRE_REPLY = `That's fantastic to hear! I'm excited about the opportunity. Could you share more about the role and the team? Happy to discuss how my Java + Angular experience at SlantCo (SlantPOS, TechPlusNexus) can help. You can reach me at divyanshraj02@gmail.com or 7236998742 — we can also set up a quick call.`;
-
-type Intent =
+export type Intent =
   | "about"
   | "skills"
   | "projects"
@@ -37,7 +43,7 @@ function resolveModel(): string {
   return model;
 }
 
-function detectIntent(userPrompt: string): Intent {
+export function detectIntent(userPrompt: string): Intent {
   const p = userPrompt.toLowerCase();
 
   if (
@@ -56,7 +62,6 @@ function detectIntent(userPrompt: string): Intent {
   }
   if (
     p.includes("technical skills") ||
-    p.includes("skills") ||
     userPrompt.includes("🔧 Technical skills") ||
     userPrompt.includes("⚙️ Technical skills")
   ) {
@@ -64,32 +69,26 @@ function detectIntent(userPrompt: string): Intent {
   }
   if (
     p.includes("recent projects") ||
-    p.includes("projects") ||
     userPrompt.includes("🚀 Recent projects")
   ) {
     return "projects";
   }
   if (
     p.includes("work experience") ||
-    p.includes("experience") ||
     userPrompt.includes("💼 Work experience")
   ) {
     return "experience";
   }
-  if (
-    p.includes("career goals") ||
-    p.includes("goals") ||
-    userPrompt.includes("🎯 Career goals")
-  ) {
+  if (p.includes("career goals") || userPrompt.includes("🎯 Career goals")) {
     return "goals";
   }
 
+  if (/\bskills?\b/.test(p)) return "skills";
+  if (/\bprojects?\b/.test(p)) return "projects";
+  if (/\bexperience\b/.test(p) || /\bwork\b/.test(p)) return "experience";
+  if (/\bgoals?\b/.test(p) || /\bcareer\b/.test(p)) return "goals";
+
   const resumeKeywords = [
-    "skill",
-    "project",
-    "experience",
-    "career",
-    "work",
     "job",
     "java",
     "angular",
@@ -141,7 +140,9 @@ async function callSarvam(
   maxTokens: number
 ): Promise<string> {
   const apiKey = process.env.SARVAM_API_KEY?.trim();
-  if (!apiKey) throw new Error("SARVAM_API_KEY is not configured");
+  if (!apiKey || apiKey.includes("your_sarvam")) {
+    throw new Error("SARVAM_API_KEY is not configured");
+  }
 
   const baseUrl = process.env.SARVAM_API_BASE_URL || "https://api.sarvam.ai";
   const model = resolveModel();
@@ -189,34 +190,87 @@ async function callSarvam(
   return text;
 }
 
+async function resolveCacheableAnswer(
+  key: CacheKey,
+  resumeData: ResumeData,
+  userPrompt: string
+): Promise<{ answer: string; source: string }> {
+  const fromMemory = getMemoryCached(key);
+  if (fromMemory) {
+    return { answer: fromMemory, source: "memory" };
+  }
+
+  const fromMongo = await getCachedAnswer(key);
+  if (fromMongo) {
+    setMemoryCached(key, fromMongo);
+    return { answer: fromMongo, source: "mongo" };
+  }
+
+  // Optional: regenerate via Sarvam then persist (costs tokens)
+  const useSarvam =
+    process.env.SARVAM_FOR_QUICK === "true" ||
+    process.env.SARVAM_FOR_QUICK === "1";
+
+  if (useSarvam && key !== "hire") {
+    try {
+      const facts = contextForIntent(resumeData, key);
+      const userContent = `FACTS:\n${facts}\n\nTASK: ${instructionFor(key)}\nQ: ${userPrompt.slice(0, 200)}`;
+      const answer = await callSarvam(userContent, maxTokensFor(key));
+      setMemoryCached(key, answer);
+      await setCachedAnswer(key, answer, "sarvam");
+      return { answer, source: "sarvam" };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown Sarvam error";
+      console.warn(`Sarvam miss for ${key}, using static:`, message);
+    }
+  }
+
+  const staticAnswer = STATIC_QUICK_REPLIES[key];
+  setMemoryCached(key, staticAnswer);
+  await setCachedAnswer(key, staticAnswer, "static");
+  return { answer: staticAnswer, source: "static" };
+}
+
 export async function getAIResponse(
   resumeData: ResumeData,
   userPrompt: string,
   sessionId?: string
-): Promise<string> {
+): Promise<{ answer: string; meta?: { intent: Intent; source: string } }> {
   console.log("User Prompt:", userPrompt);
   console.log("Session ID:", sessionId);
 
   const intent = detectIntent(userPrompt);
 
-  // Zero-token paths (no Sarvam call)
-  if (intent === "hire") return HIRE_REPLY;
   if (intent === "offtopic") {
-    return `😅 "${userPrompt}" isn’t really resume-related. Ask about my Java/Angular work, SlantPOS, TechPlusNexus, skills, or experience — happy to dive in.`;
+    return {
+      answer: `😅 "${userPrompt}" isn’t really resume-related. Ask about my Java/Angular work, SlantPOS, TechPlusNexus, skills, or experience — happy to dive in.`,
+      meta: { intent, source: "static" },
+    };
   }
 
-  const facts = contextForIntent(
-    resumeData,
-    intent === "general" ? "general" : intent
-  );
-  const userContent = `FACTS:\n${facts}\n\nTASK: ${instructionFor(intent)}\nQ: ${userPrompt.slice(0, 200)}`;
+  if (isCacheKey(intent)) {
+    const result = await resolveCacheableAnswer(intent, resumeData, userPrompt);
+    return {
+      answer: result.answer,
+      meta: { intent, source: result.source },
+    };
+  }
+
+  const facts = contextForIntent(resumeData, "general");
+  const userContent = `FACTS:\n${facts}\n\nTASK: ${instructionFor("general")}\nQ: ${userPrompt.slice(0, 200)}`;
 
   try {
-    return await callSarvam(userContent, maxTokensFor(intent));
+    const answer = await callSarvam(userContent, maxTokensFor("general"));
+    return { answer, meta: { intent, source: "sarvam" } };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown Sarvam error";
     console.error("Sarvam API Error:", message);
-    return "⚠️ Sorry, I couldn’t generate a response right now. Please try again.";
+    return {
+      answer:
+        "⚠️ AI is briefly unavailable. Try a Quick Topic below (skills, projects, experience) — those answers are cached.",
+      meta: { intent, source: "error" },
+    };
   }
 }
