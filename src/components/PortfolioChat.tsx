@@ -11,7 +11,6 @@ import {
   Cpu,
   Database,
   GitBranch,
-  Github,
   Send,
   Server,
   Terminal,
@@ -483,7 +482,7 @@ const PortfolioChat = () => {
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 hover:text-primary transition-colors"
         >
-          <Github className="w-4 h-4" />
+          <GitBranch className="w-4 h-4" />
           <span>GitHub</span>
         </a>
       </footer>
