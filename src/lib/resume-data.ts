@@ -1,11 +1,35 @@
+/**
+ * Joining date — single source of truth for experience calculation.
+ * Divyansh joined SlantCo as a fresher on 8 Nov 2022.
+ */
+export const JOINING_DATE = new Date(2022, 10, 8); // 8 Nov 2022 (month is 0-indexed)
+
+/**
+ * Returns experience in years (e.g. "3.7", "4.2").
+ * Auto-updates — no more manual edits!
+ */
+export function getExperienceYears(): string {
+  const now = new Date();
+  const diffMs = now.getTime() - JOINING_DATE.getTime();
+  const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+  return diffYears.toFixed(1);
+}
+
+/** Friendly label like "3+ yrs" or "4+ yrs" */
+export function getExperienceLabel(): string {
+  return `${Math.floor(parseFloat(getExperienceYears()))}+`;
+}
+
 /** Compact resume — keep fields short to cut Sarvam prompt tokens. */
 export const resumeData = {
   name: "Divyansh Raj",
   phone: "7236998742",
   email: "divyanshraj02@gmail.com",
+  github: "https://github.com/02Raj",
   location: "Noida, Uttar Pradesh",
-  summary:
-    "Java Full-Stack Developer, 3+ yrs. Spring Boot, Java, REST APIs, Angular. Backend + JPA/Hibernate, responsive Angular UI, performance-minded, Agile delivery.",
+  get summary() {
+    return `Java Full-Stack Developer, ${getExperienceYears()} yrs. Spring Boot, Java, REST APIs, Angular, React/Next.js. Backend + JPA/Hibernate, responsive UI, cloud-native SaaS products, AI-assisted features, performance-minded, Agile delivery.`;
+  },
   role: "Full Stack Developer (Java + Angular)",
   company: "SlantCo, Noida",
   duration: "Nov 2022 – Present",
@@ -17,6 +41,30 @@ export const resumeData = {
     "Agile/Scrum: sprints, reviews, production deploys",
   ],
   projects: [
+    {
+      name: "CloudSaathi",
+      period: "Jul 2025 – Present",
+      blurb:
+        "Voice/text agentic AI assistant for AWS cloud ops; human-in-the-loop safety for write ops, security audits, cost monitoring, phone alerts via Bolna AI",
+      stack: "Python, FastAPI, Amazon Bedrock (Claude), Boto3, Whisper, Amazon Polly, Docker",
+      live: "",
+    },
+    {
+      name: "DoctorFlow (ClinicDesk)",
+      period: "May 2025 – Present",
+      blurb:
+        "Clinic management SaaS: appointments, patient records, WhatsApp automation, AI document analysis, billing; multi-clinic support",
+      stack: "React, TypeScript, Firebase, Firestore, Sarvam AI, Twilio, Vercel",
+      live: "clinic-desk-app.vercel.app",
+    },
+    {
+      name: "TutorPe",
+      period: "Apr 2025 – Present",
+      blurb:
+        "Ed-tech SaaS platform for tutors: student management, attendance, fee tracking, batch scheduling, WhatsApp notifications",
+      stack: "Next.js, TypeScript, Firebase, Firestore, Vercel",
+      live: "tutorpe.in",
+    },
     {
       name: "SlantPOS",
       period: "Nov 2022 – Present",
@@ -37,15 +85,16 @@ export const resumeData = {
   education:
     "B.Tech ECE, Bundelkhand Institute of Engineering and Technology, Jhansi (2017–2021)",
   skills: {
-    languages: "Java, JavaScript, TypeScript, SQL",
-    frontend: "Angular 19, Material, PrimeNG, RxJS, NgRx, HTML5, CSS3",
-    backend: "Spring Boot/MVC, JPA, Hibernate, JDBC, REST, Microservices, JWT",
-    databases: "MySQL, PostgreSQL, MongoDB",
-    cloud: "AWS EC2/S3/CloudWatch/IAM/Route53, Docker, GitLab CI/CD",
+    languages: "Java, JavaScript, TypeScript, Python, SQL",
+    frontend: "Angular 19, React, Next.js, Material, PrimeNG, RxJS, NgRx, HTML5, CSS3",
+    backend: "Spring Boot/MVC, JPA, Hibernate, FastAPI, REST, Microservices, JWT",
+    databases: "MySQL, PostgreSQL, MongoDB, Firebase/Firestore",
+    cloud: "AWS (EC2/S3/CloudWatch/IAM/Route53/Bedrock), Docker, Vercel, GitLab CI/CD",
+    ai: "Amazon Bedrock (Claude), Gemini, Sarvam AI, Whisper, Amazon Polly, Bolna AI",
     tools: "IntelliJ, VS Code, Postman, Git, GitHub, JIRA",
   },
   goals:
-    "Build scalable Java/Angular systems; deepen cloud, microservices, and AI-assisted product features.",
+    "Build scalable Java/Angular systems; deepen cloud, microservices, and AI-assisted product features. Currently building CloudSaathi — an agentic AI assistant for AWS cloud ops with voice, security audits, and cost monitoring.",
 };
 
 export type ResumeData = typeof resumeData;
@@ -64,7 +113,7 @@ export function contextForIntent(
   switch (intent) {
     case "about":
       return [
-        `${data.name} | ${data.location} | ${data.email}`,
+        `${data.name} | ${data.location} | ${data.email} | GitHub: ${data.github}`,
         data.summary,
         `${data.role} @ ${data.company} (${data.duration})`,
         `Projects: ${data.projects.map((p) => p.name).join(", ")}`,
