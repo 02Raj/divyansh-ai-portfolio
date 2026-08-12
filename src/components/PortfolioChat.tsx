@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getExperienceLabel } from "@/lib/resume-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,6 +11,7 @@ import {
   Cpu,
   Database,
   GitBranch,
+  Github,
   Send,
   Server,
   Terminal,
@@ -373,7 +375,7 @@ const PortfolioChat = () => {
           {!hasChat && (
             <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed text-base sm:text-[1.05rem]">
               Welcome to my interactive AI portfolio! I&apos;m a Java Full-Stack
-              Developer with 3+ years of experience (Spring Boot + Angular). Ask
+              Developer with {getExperienceLabel()} years of experience (Spring Boot + Angular). Ask
               me about SlantPOS, TechPlusNexus, skills, or my background.
             </p>
           )}
@@ -471,10 +473,19 @@ const PortfolioChat = () => {
         </section>
       </main>
 
-      <footer className="relative z-10 mt-auto border-t border-white/5 py-5 text-center">
-        <p className="text-xs sm:text-sm text-muted-foreground/70">
+      <footer className="relative z-10 mt-auto border-t border-white/5 py-5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center text-xs sm:text-sm text-muted-foreground/70">
+        <p>
           © 2025 Divyansh Raj. All rights reserved.
         </p>
+        <a
+          href="https://github.com/02Raj"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 hover:text-primary transition-colors"
+        >
+          <Github className="w-4 h-4" />
+          <span>GitHub</span>
+        </a>
       </footer>
     </div>
   );
