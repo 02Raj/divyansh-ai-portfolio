@@ -43,14 +43,33 @@ function resolveModel(): string {
   return model;
 }
 
+function isHireIntent(prompt: string): boolean {
+  if (prompt.includes("✨ I want to hire you")) return true;
+
+  const p = prompt.toLowerCase().trim();
+
+  const patterns = [
+    /\bhire\s+(you|me|him|her|divyansh)\b/,
+    /\b(i|we)\s+(want|wanna)\s+to\s+hire\b/,
+    /\bcan\s+(i|we)\s+hire\b/,
+    /\blooking\s+to\s+hire\b/,
+    /\bwant\s+to\s+hire\b/,
+    /\bhiring\b/,
+    /\binterested\s+in\s+hiring\b/,
+    /\boffer\s+(you|him|divyansh)\s+(a\s+)?(job|role|position)\b/,
+    /\bjoin\s+(my|our)\s+team\b/,
+    /\bbring\s+you\s+on\b/,
+    /\brecruit\b/,
+    /\bopen\s+position\b.*\bfor\s+you\b/,
+  ];
+
+  return patterns.some((re) => re.test(p));
+}
+
 export function detectIntent(userPrompt: string): Intent {
   const p = userPrompt.toLowerCase();
 
-  if (
-    p.includes("hire you") ||
-    p.includes("i want to hire") ||
-    userPrompt.includes("✨ I want to hire you")
-  ) {
+  if (isHireIntent(userPrompt)) {
     return "hire";
   }
   if (
