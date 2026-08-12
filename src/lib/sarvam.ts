@@ -1,5 +1,10 @@
 import { contextForIntent, type ResumeData } from "@/lib/resume-data";
 import { STATIC_QUICK_REPLIES } from "@/lib/quick-replies";
+import { getOffTopicReply } from "@/lib/offtopic-replies";
+import {
+  getStaticResumeAnswer,
+  isResumeRelated,
+} from "@/lib/resume-intent";
 import {
   getCachedAnswer,
   isCacheKey,
@@ -102,21 +107,22 @@ export function detectIntent(userPrompt: string): Intent {
     return "goals";
   }
 
+  if (
+    /\b(current|present|latest|ongoing)\b/.test(p) &&
+    /\b(project|work|role|company)\b/.test(p)
+  ) {
+    return "projects";
+  }
+  if (/\b(what are you (working on|building)|working on (now|currently))\b/.test(p)) {
+    return "projects";
+  }
+
   if (/\bskills?\b/.test(p)) return "skills";
   if (/\bprojects?\b/.test(p)) return "projects";
   if (/\bexperience\b/.test(p) || /\bwork\b/.test(p)) return "experience";
   if (/\bgoals?\b/.test(p) || /\bcareer\b/.test(p)) return "goals";
 
-  const resumeKeywords = [
-    "job",
-    "java",
-    "angular",
-    "spring",
-    "resume",
-    "background",
-    "education",
-  ];
-  if (resumeKeywords.some((k) => p.includes(k))) return "general";
+  if (isResumeRelated(userPrompt)) return "general";
   return "offtopic";
 }
 
@@ -263,9 +269,14 @@ export async function getAIResponse(
 
   if (intent === "offtopic") {
     return {
-      answer: `😅 "${userPrompt}" isn’t really resume-related. Ask about my Java/Angular work, SlantPOS, TechPlusNexus, skills, or experience — happy to dive in.`,
+      answer: getOffTopicReply(userPrompt),
       meta: { intent, source: "static" },
     };
+  }
+
+  const staticFact = getStaticResumeAnswer(userPrompt, resumeData);
+  if (staticFact) {
+    return { answer: staticFact, meta: { intent, source: "static" } };
   }
 
   if (isCacheKey(intent)) {
