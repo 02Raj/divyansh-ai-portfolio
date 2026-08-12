@@ -7,7 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Braces,
   Code2,
+  Cpu,
   Database,
+  GitBranch,
   Send,
   Server,
   Terminal,
@@ -117,22 +119,75 @@ const formatResponse = (content: string) => {
 
 function TechBackdrop() {
   const icons = [
-    { Icon: Database, className: "left-[8%] top-[18%] size-10", delay: "0s" },
-    { Icon: Braces, className: "right-[10%] top-[22%] size-12", delay: "1.2s" },
-    { Icon: Code2, className: "left-[14%] bottom-[28%] size-9", delay: "2s" },
-    { Icon: Terminal, className: "right-[16%] bottom-[24%] size-10", delay: "0.6s" },
-    { Icon: Server, className: "left-[42%] top-[12%] size-8", delay: "1.8s" },
-    { Icon: Database, className: "right-[38%] bottom-[14%] size-8", delay: "2.4s" },
-  ];
+    {
+      Icon: Database,
+      className: "left-[7%] top-[16%] size-11",
+      motion: "tech-glyph-drift",
+      delay: "0s",
+      duration: "11s",
+    },
+    {
+      Icon: Braces,
+      className: "right-[9%] top-[20%] size-12",
+      motion: "tech-glyph-float",
+      delay: "0.8s",
+      duration: "9s",
+    },
+    {
+      Icon: Code2,
+      className: "left-[12%] bottom-[26%] size-10",
+      motion: "tech-glyph-glow",
+      delay: "1.4s",
+      duration: "8s",
+    },
+    {
+      Icon: Terminal,
+      className: "right-[14%] bottom-[22%] size-10",
+      motion: "tech-glyph-drift-alt",
+      delay: "0.4s",
+      duration: "10s",
+    },
+    {
+      Icon: Cpu,
+      className: "left-[38%] top-[10%] size-9",
+      motion: "tech-glyph-float",
+      delay: "1.8s",
+      duration: "12s",
+    },
+    {
+      Icon: GitBranch,
+      className: "right-[34%] bottom-[12%] size-9",
+      motion: "tech-glyph-glow",
+      delay: "2.2s",
+      duration: "7.5s",
+    },
+    {
+      Icon: Server,
+      className: "left-[22%] top-[42%] size-8",
+      motion: "tech-glyph-drift",
+      delay: "2.8s",
+      duration: "13s",
+    },
+    {
+      Icon: Database,
+      className: "right-[22%] top-[48%] size-8",
+      motion: "tech-glyph-drift-alt",
+      delay: "1.1s",
+      duration: "9.5s",
+    },
+  ] as const;
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      {icons.map(({ Icon, className, delay }, i) => (
+    <div className="tech-backdrop" aria-hidden>
+      <div className="tech-orb tech-orb-a" />
+      <div className="tech-orb tech-orb-b" />
+      <div className="tech-orb tech-orb-c" />
+      {icons.map(({ Icon, className, motion, delay, duration }, i) => (
         <Icon
           key={i}
-          className={`tech-glyph absolute ${className}`}
-          style={{ animationDelay: delay }}
-          strokeWidth={1.25}
+          className={`tech-glyph absolute ${motion} ${className}`}
+          style={{ animationDelay: delay, animationDuration: duration }}
+          strokeWidth={1.2}
         />
       ))}
     </div>

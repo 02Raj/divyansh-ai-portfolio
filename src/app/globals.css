@@ -106,10 +106,68 @@
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -14px, 0) rotate(2deg);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate3d(12px, -18px, 0) scale(1.06);
+    opacity: 0.22;
+  }
+}
+
+@keyframes drift-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate3d(-14px, 10px, 0) rotate(-4deg);
+    opacity: 0.2;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.08;
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    opacity: 0.22;
+    filter: drop-shadow(0 0 10px hsl(217 92% 62% / 0.25));
+  }
+}
+
+@keyframes orb-breathe {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.15) translate(2%, -3%);
+    opacity: 0.55;
+  }
+}
+
+@keyframes soft-pan {
+  0%,
+  100% {
+    background-position: 0% 40%, 100% 60%, 50% 100%;
+  }
+  50% {
+    background-position: 20% 30%, 80% 70%, 45% 90%;
   }
 }
 
@@ -122,6 +180,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     background: var(--gradient-background);
+    background-size: 140% 140%, 140% 140%, 140% 140%, auto;
+    animation: soft-pan 22s ease-in-out infinite;
     min-height: 100vh;
   }
 
@@ -195,8 +255,75 @@
     @apply text-sky-400 font-bold;
   }
 
+  .tech-backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .tech-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+    animation: orb-breathe 14s ease-in-out infinite;
+  }
+
+  .tech-orb-a {
+    width: 18rem;
+    height: 18rem;
+    left: -4%;
+    top: 12%;
+    background: hsl(217 92% 55% / 0.12);
+  }
+
+  .tech-orb-b {
+    width: 16rem;
+    height: 16rem;
+    right: -2%;
+    bottom: 18%;
+    background: hsl(262 70% 55% / 0.1);
+    animation-delay: 3s;
+  }
+
+  .tech-orb-c {
+    width: 12rem;
+    height: 12rem;
+    left: 42%;
+    top: 58%;
+    background: hsl(200 80% 50% / 0.08);
+    animation-delay: 6s;
+  }
+
   .tech-glyph {
-    color: hsl(217 40% 55% / 0.14);
-    animation: float 8s ease-in-out infinite;
+    color: hsl(217 45% 65% / 0.16);
+    will-change: transform, opacity;
+  }
+
+  .tech-glyph-float {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  .tech-glyph-drift {
+    animation: drift 11s ease-in-out infinite;
+  }
+
+  .tech-glyph-drift-alt {
+    animation: drift-alt 10s ease-in-out infinite;
+  }
+
+  .tech-glyph-glow {
+    animation: glow-pulse 7s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body,
+    .tech-orb,
+    .tech-glyph-float,
+    .tech-glyph-drift,
+    .tech-glyph-drift-alt,
+    .tech-glyph-glow {
+      animation: none !important;
+    }
   }
 }
