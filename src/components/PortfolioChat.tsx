@@ -26,9 +26,86 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   audioBase64?: string;
+  isStreaming?: boolean;
 }
 
 const PROFILE_SRC = "/divyansh-profile.jpg";
+
+/** Simulates word-by-word streaming like ChatGPT */
+function useStreamText(fullText: string, active: boolean, speed = 30) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!active) { setDisplayed(fullText); setDone(true); return; }
+    setDisplayed("");
+    setDone(false);
+    const words = fullText.split(/(?<=\s)/);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(words.slice(0, i).join(""));
+      if (i >= words.length) { clearInterval(interval); setDone(true); }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [fullText, active, speed]);
+
+  return { displayed, done };
+}
+
+/** Individual message component with streaming support */
+function StreamingMessage({ message, onStreamDone, playAudio }: {
+  message: ChatMessage;
+  onStreamDone?: (id: string) => void;
+  playAudio: (b64: string) => void;
+}) {
+  const { displayed, done } = useStreamText(
+    message.content,
+    message.isStreaming === true,
+    25
+  );
+
+  useEffect(() => {
+    if (done && message.isStreaming && onStreamDone) {
+      onStreamDone(message.id);
+    }
+  }, [done, message.isStreaming, message.id, onStreamDone]);
+
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+  const text = message.type === "assistant" ? displayed : message.content;
+  const htmlContent = message.type === "assistant" ? formatResponse(text) : text;
+
+  return (
+    <div className={`rounded-2xl px-4 py-3 ${message.type === "user" ? "msg-user" : "msg-assistant"}`}>
+      <div
+        className="whitespace-pre-wrap leading-relaxed text-sm sm:text-[0.95rem] formatted-content"
+        dangerouslySetInnerHTML={{ __html: htmlContent }}
+      />
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-[11px] opacity-50">
+          {formatTime(message.timestamp)}
+        </p>
+        {message.type === "assistant" && message.audioBase64 && (
+          <button
+            type="button"
+            onClick={() => playAudio(message.audioBase64!)}
+            className="voice-replay-btn ml-2 p-1 rounded-md hover:bg-white/10 transition-colors"
+            aria-label="Replay voice"
+            title="Replay voice"
+          >
+            <Volume2 className="w-3.5 h-3.5 text-primary/70" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const formatResponse = (content: string) => {
   const escapeRegex = (string: string) =>
@@ -245,11 +322,63 @@ const PortfolioChat = () => {
   const [hasClickedAny, setHasClickedAny] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const waveformRef = useRef<HTMLCanvasElement | null>(null);
+  const animFrameRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasChat = messages.length > 0 || isTyping;
+
+  // Mark streaming messages as done
+  const handleStreamDone = useCallback((id: string) => {
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, isStreaming: false } : m));
+  }, []);
+
+  // Draw waveform visualizer
+  const drawWaveform = useCallback(() => {
+    const analyser = analyserRef.current;
+    const canvas = waveformRef.current;
+    if (!analyser || !canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      animFrameRef.current = requestAnimationFrame(draw);
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw bars style waveform
+      const barCount = 32;
+      const barWidth = canvas.width / barCount;
+      const step = Math.floor(bufferLength / barCount);
+
+      for (let i = 0; i < barCount; i++) {
+        const value = dataArray[i * step] ?? 128;
+        const normalized = Math.abs(value - 128) / 128;
+        const barHeight = Math.max(2, normalized * canvas.height * 0.9);
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "hsla(217, 92%, 62%, 0.9)");
+        gradient.addColorStop(1, "hsla(262, 80%, 68%, 0.9)");
+        ctx.fillStyle = gradient;
+
+        const x = i * barWidth + 1;
+        const y = (canvas.height - barHeight) / 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, barWidth - 2, barHeight, 2);
+        ctx.fill();
+      }
+    };
+    draw();
+  }, []);
 
   const quickActions = [
     { id: "about", label: "👋 Tell me about yourself", emoji: "👋" },
@@ -288,6 +417,7 @@ const PortfolioChat = () => {
           type: "assistant",
           content: data.answer,
           timestamp: new Date(),
+          isStreaming: true,
         },
       ]);
     } catch (error) {
@@ -326,19 +456,32 @@ const PortfolioChat = () => {
       if (currentAudioRef.current) {
         currentAudioRef.current.pause();
         currentAudioRef.current = null;
+        setIsSpeaking(false);
       }
       const audio = new Audio(`data:audio/wav;base64,${base64}`);
       currentAudioRef.current = audio;
+      setIsSpeaking(true);
       audio.play().catch(console.error);
-      audio.onended = () => { currentAudioRef.current = null; };
+      audio.onended = () => { currentAudioRef.current = null; setIsSpeaking(false); };
+      audio.onerror = () => { setIsSpeaking(false); };
     } catch (e) {
       console.error("Audio playback error:", e);
+      setIsSpeaking(false);
     }
   }, []);
 
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Set up audio analyser for waveform visualizer
+      const audioCtxLive = new AudioContext();
+      const source = audioCtxLive.createMediaStreamSource(stream);
+      const analyser = audioCtxLive.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : MediaRecorder.isTypeSupported("audio/webm")
@@ -348,12 +491,18 @@ const PortfolioChat = () => {
       const recorder = new MediaRecorder(stream, { mimeType });
       audioChunksRef.current = [];
 
+      // Start waveform drawing
+      drawWaveform();
+
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       recorder.onstop = async () => {
-        // Stop all tracks
+        // Stop waveform + tracks
+        cancelAnimationFrame(animFrameRef.current);
+        analyserRef.current = null;
+        audioCtxLive.close().catch(() => {});
         stream.getTracks().forEach((t) => t.stop());
 
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
@@ -440,15 +589,17 @@ const PortfolioChat = () => {
             },
           ]);
 
-          // Add assistant message with audio
+          // Add assistant message with audio + streaming
+          const assistantId = (Date.now() + 1).toString();
           setMessages((prev) => [
             ...prev,
             {
-              id: (Date.now() + 1).toString(),
+              id: assistantId,
               type: "assistant",
               content: data.answer,
               timestamp: new Date(),
               audioBase64: data.audioBase64 || undefined,
+              isStreaming: true,
             },
           ]);
 
@@ -480,7 +631,7 @@ const PortfolioChat = () => {
       console.error("Mic access denied:", err);
       alert("Microphone access is required for voice input. Please allow microphone access and try again.");
     }
-  }, [playAudio]);
+  }, [playAudio, drawWaveform]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -526,8 +677,16 @@ const PortfolioChat = () => {
           }`}
         >
           <div className={`relative mx-auto mb-5 ${hasChat ? "w-16 h-16" : "w-24 h-24 sm:w-28 sm:h-28"}`}>
+            {/* Talking avatar pulse ring */}
+            {isSpeaking && (
+              <div className="absolute inset-0 rounded-full avatar-speaking-ring" />
+            )}
             <Avatar
-              className={`mx-auto border border-white/15 shadow-[0_0_40px_hsl(217_92%_62%/0.18)] transition-all duration-500 ${
+              className={`mx-auto border border-white/15 transition-all duration-500 ${
+                isSpeaking
+                  ? "shadow-[0_0_50px_hsl(217_92%_62%/0.4)] scale-105"
+                  : "shadow-[0_0_40px_hsl(217_92%_62%/0.18)]"
+              } ${
                 hasChat ? "w-16 h-16" : "w-24 h-24 sm:w-28 sm:h-28"
               }`}
             >
@@ -596,37 +755,11 @@ const PortfolioChat = () => {
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  <div
-                    className={`rounded-2xl px-4 py-3 ${
-                      message.type === "user" ? "msg-user" : "msg-assistant"
-                    }`}
-                  >
-                    <div
-                      className="whitespace-pre-wrap leading-relaxed text-sm sm:text-[0.95rem] formatted-content"
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          message.type === "assistant"
-                            ? formatResponse(message.content)
-                            : message.content,
-                      }}
-                    />
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-[11px] opacity-50">
-                        {formatTime(message.timestamp)}
-                      </p>
-                      {message.type === "assistant" && message.audioBase64 && (
-                        <button
-                          type="button"
-                          onClick={() => playAudio(message.audioBase64!)}
-                          className="voice-replay-btn ml-2 p-1 rounded-md hover:bg-white/10 transition-colors"
-                          aria-label="Replay voice"
-                          title="Replay voice"
-                        >
-                          <Volume2 className="w-3.5 h-3.5 text-primary/70" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  <StreamingMessage
+                    message={message}
+                    onStreamDone={handleStreamDone}
+                    playAudio={playAudio}
+                  />
                   {message.type === "user" && (
                     <Avatar className="w-8 h-8 border border-white/10 shrink-0 mt-1">
                       <AvatarFallback className="bg-muted text-muted-foreground">
@@ -643,6 +776,17 @@ const PortfolioChat = () => {
         )}
 
         <section className="shrink-0 w-full animate-fade-in-up" style={{ animationDelay: "120ms" }}>
+          {/* Live waveform during recording */}
+          {isRecording && (
+            <div className="waveform-container mb-3 flex items-center justify-center">
+              <canvas
+                ref={waveformRef}
+                width={300}
+                height={40}
+                className="waveform-canvas rounded-xl"
+              />
+            </div>
+          )}
           <div className="composer-shell flex items-center gap-2 rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3">
             <Input
               value={inputValue}
