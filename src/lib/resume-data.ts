@@ -126,6 +126,7 @@ export function contextForIntent(
         `Backend: ${data.skills.backend}`,
         `DB: ${data.skills.databases}`,
         `Cloud: ${data.skills.cloud}`,
+        `AI/ML: ${data.skills.ai}`,
         `Tools: ${data.skills.tools}`,
       ].join("\n");
     case "projects":

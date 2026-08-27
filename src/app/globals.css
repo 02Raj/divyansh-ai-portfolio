@@ -327,3 +327,60 @@
     }
   }
 }
+
+/* ── Voice Agent Styles ─────────────────────────────── */
+
+/* Mic button idle state */
+.voice-btn {
+  position: relative;
+}
+
+.voice-btn:hover {
+  color: hsl(var(--primary));
+}
+
+/* Mic button recording state — pulsing red glow */
+.voice-btn-recording {
+  position: relative;
+  animation: voice-pulse 1.5s ease-in-out infinite;
+}
+
+.voice-btn-recording::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 12px;
+  background: radial-gradient(circle, hsl(0 84% 60% / 0.25), transparent 70%);
+  animation: voice-ring 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes voice-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(0 84% 60% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px hsl(0 84% 60% / 0.2);
+  }
+}
+
+@keyframes voice-ring {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
+}
+
+/* Replay voice button on assistant messages */
+.voice-replay-btn {
+  opacity: 0.6;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.voice-replay-btn:hover {
+  opacity: 1;
+}

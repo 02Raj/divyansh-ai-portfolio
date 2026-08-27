@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getExperienceLabel } from "@/lib/resume-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,13 @@ import {
   Cpu,
   Database,
   GitBranch,
+  Mic,
   Send,
   Server,
+  Square,
   Terminal,
   User,
+  Volume2,
 } from "lucide-react";
 
 interface ChatMessage {
@@ -22,6 +25,7 @@ interface ChatMessage {
   type: "user" | "assistant";
   content: string;
   timestamp: Date;
+  audioBase64?: string;
 }
 
 const PROFILE_SRC = "/divyansh-profile.jpg";
@@ -239,6 +243,11 @@ const PortfolioChat = () => {
   const [sessionId] = useState(() => Date.now().toString());
   const [clickedTopics, setClickedTopics] = useState<Set<string>>(new Set());
   const [hasClickedAny, setHasClickedAny] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const hasChat = messages.length > 0 || isTyping;
 
@@ -311,6 +320,184 @@ const PortfolioChat = () => {
     await sendPrompt(action.label);
   };
 
+  const playAudio = useCallback((base64: string) => {
+    try {
+      // Stop any currently playing audio
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
+      const audio = new Audio(`data:audio/wav;base64,${base64}`);
+      currentAudioRef.current = audio;
+      audio.play().catch(console.error);
+      audio.onended = () => { currentAudioRef.current = null; };
+    } catch (e) {
+      console.error("Audio playback error:", e);
+    }
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        // Stop all tracks
+        stream.getTracks().forEach((t) => t.stop());
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (audioBlob.size === 0) return;
+
+        setIsProcessingVoice(true);
+        setIsTyping(true);
+
+        try {
+          // Convert WebM/MP4 to WAV (16kHz, mono, 16-bit PCM)
+          // Sarvam STT doesn't accept WebM — only WAV, MP3, AAC, etc.
+          const arrayBuffer = await audioBlob.arrayBuffer();
+          const audioCtx = new AudioContext({ sampleRate: 16000 });
+          const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+          const channelData = decoded.getChannelData(0); // mono
+          const sampleRate = 16000;
+
+          // Resample if AudioContext didn't honour our sampleRate hint
+          let samples = channelData;
+          if (decoded.sampleRate !== sampleRate) {
+            const ratio = decoded.sampleRate / sampleRate;
+            const newLen = Math.floor(channelData.length / ratio);
+            const resampled = new Float32Array(newLen);
+            for (let i = 0; i < newLen; i++) {
+              resampled[i] = channelData[Math.floor(i * ratio)];
+            }
+            samples = resampled;
+          }
+
+          // Encode WAV
+          const wavBuffer = new ArrayBuffer(44 + samples.length * 2);
+          const view = new DataView(wavBuffer);
+          const writeStr = (off: number, s: string) => {
+            for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i));
+          };
+          writeStr(0, "RIFF");
+          view.setUint32(4, 36 + samples.length * 2, true);
+          writeStr(8, "WAVE");
+          writeStr(12, "fmt ");
+          view.setUint32(16, 16, true);
+          view.setUint16(20, 1, true); // PCM
+          view.setUint16(22, 1, true); // mono
+          view.setUint32(24, sampleRate, true);
+          view.setUint32(28, sampleRate * 2, true);
+          view.setUint16(32, 2, true);
+          view.setUint16(34, 16, true);
+          writeStr(36, "data");
+          view.setUint32(40, samples.length * 2, true);
+          for (let i = 0; i < samples.length; i++) {
+            const s = Math.max(-1, Math.min(1, samples[i]));
+            view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+          }
+          await audioCtx.close();
+
+          const wavBlob = new Blob([wavBuffer], { type: "audio/wav" });
+
+          const formData = new FormData();
+          formData.append("audio", wavBlob, "recording.wav");
+
+          const res = await fetch("/api/voice", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || "Voice API failed");
+          }
+
+          const data = await res.json() as {
+            transcript: string;
+            answer: string;
+            audioBase64: string | null;
+          };
+
+          // Add user message (transcript)
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              type: "user",
+              content: `🎤 ${data.transcript}`,
+              timestamp: new Date(),
+            },
+          ]);
+
+          // Add assistant message with audio
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              type: "assistant",
+              content: data.answer,
+              timestamp: new Date(),
+              audioBase64: data.audioBase64 || undefined,
+            },
+          ]);
+
+          // Auto-play the audio response
+          if (data.audioBase64) {
+            playAudio(data.audioBase64);
+          }
+        } catch (error) {
+          console.error("Voice API Error:", error);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              type: "assistant",
+              content: "Sorry, I couldn't process your voice message. Please try typing instead.",
+              timestamp: new Date(),
+            },
+          ]);
+        } finally {
+          setIsTyping(false);
+          setIsProcessingVoice(false);
+        }
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Mic access denied:", err);
+      alert("Microphone access is required for voice input. Please allow microphone access and try again.");
+    }
+  }, [playAudio]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      mediaRecorderRef.current = null;
+    }
+  }, []);
+
+  const handleMicClick = useCallback(() => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }, [isRecording, startRecording, stopRecording]);
+
   const handleSendMessage = async () => {
     const value = inputValue;
     setInputValue("");
@@ -372,11 +559,22 @@ const PortfolioChat = () => {
             AI Portfolio Assistant
           </p>
           {!hasChat && (
-            <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed text-base sm:text-[1.05rem]">
-              Welcome to my interactive AI portfolio! I&apos;m a Java Full-Stack
-              Developer with {getExperienceLabel()} years of experience (Spring Boot + Angular). Ask
-              me about SlantPOS, TechPlusNexus, skills, or my background.
-            </p>
+            <div className="flex flex-col items-center gap-5">
+              <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed text-base sm:text-[1.05rem]">
+                Welcome to my interactive AI portfolio! I&apos;m a Java Full-Stack
+                Developer with {getExperienceLabel()} years of experience (Spring Boot + Angular). Ask
+                me about SlantPOS, TechPlusNexus, skills, or my background.
+              </p>
+              <a 
+                href="https://portfolio.divyanshraj.in" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-white/10 transition-colors border border-white/5 shadow-sm"
+              >
+                <span>View Standard Portfolio</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              </a>
+            </div>
           )}
         </section>
 
@@ -412,9 +610,22 @@ const PortfolioChat = () => {
                             : message.content,
                       }}
                     />
-                    <p className="text-[11px] mt-2 opacity-50">
-                      {formatTime(message.timestamp)}
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-[11px] opacity-50">
+                        {formatTime(message.timestamp)}
+                      </p>
+                      {message.type === "assistant" && message.audioBase64 && (
+                        <button
+                          type="button"
+                          onClick={() => playAudio(message.audioBase64!)}
+                          className="voice-replay-btn ml-2 p-1 rounded-md hover:bg-white/10 transition-colors"
+                          aria-label="Replay voice"
+                          title="Replay voice"
+                        >
+                          <Volume2 className="w-3.5 h-3.5 text-primary/70" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {message.type === "user" && (
                     <Avatar className="w-8 h-8 border border-white/10 shrink-0 mt-1">
@@ -436,11 +647,31 @@ const PortfolioChat = () => {
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask me about my experience, projects, or skills..."
+              placeholder={isRecording ? "🎤 Listening..." : isProcessingVoice ? "Processing voice..." : "Ask me about my experience, projects, or skills..."}
               className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base placeholder:text-muted-foreground/70 h-11"
               onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-              disabled={isTyping}
+              disabled={isTyping || isRecording}
             />
+            <Button
+              onClick={handleMicClick}
+              disabled={isTyping && !isRecording}
+              size="icon"
+              className={`h-11 w-11 rounded-xl transition-all duration-200 ${
+                isRecording
+                  ? "voice-btn-recording bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  : isProcessingVoice
+                  ? "text-muted-foreground opacity-50"
+                  : "voice-btn text-primary hover:text-primary hover:bg-white/5"
+              }`}
+              variant="ghost"
+              aria-label={isRecording ? "Stop recording" : "Start voice input"}
+            >
+              {isRecording ? (
+                <Square className="w-4 h-4 fill-current" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
+            </Button>
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping}
