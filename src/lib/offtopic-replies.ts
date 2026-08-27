@@ -57,8 +57,8 @@ export function getOffTopicReply(question: string): string {
   if (/\b(joke|funny|laugh|bored|tell me something)\b/.test(p)) {
     return pick(
       [
-        `Why do Java developers wear glasses? Because they don't C#! 😄 Jokes aside — my real punchlines are in production: SlantPOS, TechPlusNexus, and 3+ years of full-stack work. Want details?`,
-        `I'd roast a bad API design before I'd roast a stranger. 🔥 Ask about my projects or skills — that's where the good stories live.`,
+        `Ek joke suno: Java developers chashma kyun pehnte hain? Kyunki wo C# (see sharp) nahi kar paate! 😂 Jokes se hatkar — meri asli punchlines production mein hain: SlantPOS, TechPlusNexus. Detail chahiye?`,
+        `Main kisi insaan ko roast karne se behtar ek kharab API design ko roast karna pasand karunga. 🔥 Baaki mere skills aur projects ke baare mein pucho — wahan asli masala hai!`,
       ],
       p
     );
@@ -68,8 +68,8 @@ export function getOffTopicReply(question: string): string {
   if (/\b(who made you|are you real|chatgpt|gemini|sarvam|ai model)\b/.test(p)) {
     return pick(
       [
-        `I'm Divyansh's portfolio assistant — powered to answer questions about his career, not the universe. 😊 Try "Tell me about yourself" or "Recent projects" for the good stuff.`,
-        `Think of me as Divyansh's interactive resume with personality. I shine on skills, experience, and projects — give me one of those!`,
+        `Main Divyansh ka AI avatar hoon — ChatGPT ya Gemini ka door ka ristedar! 😎 Mera kaam uske resume aur career ke baare mein baat karna hai. Aaiye "Recent projects" par charcha karein!`,
+        `Socho main Divyansh ka ek smart interactive resume hoon jisme thodi personality hai. Main skills, experience aur projects mein ekdum champion hoon — koi ek try karke dekho!`,
       ],
       p
     );
@@ -78,10 +78,11 @@ export function getOffTopicReply(question: string): string {
   // Default — playful deflect, mention their question
   return pick(
     [
-      `😅 "${q}" is a fun detour — I'm tuned for Divyansh's professional story (Java, Angular, SlantPOS, TechPlusNexus). Throw me a career question and I'll give you a proper answer!`,
-      `Interesting! "${q}" isn't in my resume playbook, but I can go deep on skills, current projects, or work experience. Which one sounds good?`,
-      `Ha — "${q}" is outside my lane. I'm here for portfolio chat: projects, tech stack, SlantCo experience, or even "I want to hire you". Pick your adventure! 🚀`,
-      `"${q}" — I'd need Wikipedia for that one! For Divyansh Raj stuff (full-stack, Spring Boot, Angular), I'm your guy. What should we dive into?`,
+      `Arey bhai, "${q}" ke baare me toh mujhe bhi Google karna padega! 😂 Main Divyansh ka AI assistant hoon, aur meri training sirf uske professional experience (Java, Angular) par hui hai. Kuch tech related pucho ya meri skills dekho!`,
+      `Haha, "${q}"? Yeh out of syllabus question tha! 😅 Meri expertise SlantPOS aur Spring Boot mein hai. Agar aapko Divyansh ko hire karna hai ya uske projects dekhne hain, toh zaroor batao!`,
+      `Bhai "${q}" ka answer dunga toh hallucinate kar jaunga. 🤖 Main yahan Divyansh ki portfolio represent karne aaya hoon. Projects, experience, ya skills ke baare mein kuch bhi puch lo — I am fully loaded for that! 🚀`,
+      `Interesting! "${q}" mere resume playbook me nahi hai. Par agar aapko backend architecture ya Angular frontend ke baare mein kuch puchna hai, toh main ready hoon! Kya bolte ho, skills ya experience par baat karein?`,
+      `"${q}" — lagta hai aap mera test le rahe ho! 🕵️‍♂️ Main sirf Divyansh ke career aur tech stack ke baare me jaanta hoon. Aaiye, kaam ki baat karte hain — uske projects aur experience check karein?`
     ],
     p
   );
