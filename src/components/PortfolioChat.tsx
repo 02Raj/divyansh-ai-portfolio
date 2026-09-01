@@ -1,21 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getExperienceLabel } from "@/lib/resume-data";
+import { getExperienceLabel, portfolioHighlights } from "@/lib/resume-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Braces,
-  Code2,
-  Cpu,
-  Database,
   GitBranch,
   Mic,
   Send,
-  Server,
   Square,
-  Terminal,
   User,
   Volume2,
 } from "lucide-react";
@@ -189,6 +183,14 @@ const formatResponse = (content: string) => {
   });
 
   formattedContent = formattedContent.replace(
+    /(\d[\d,]*(?:\.\d+)?(?:%|\+|ms|s|k|K|M)?(?:\/\w+)?|\b\d+\+\b)/g,
+    (match) => {
+      if (match.includes("span")) return match;
+      return `<span class="metric-highlight">${match}</span>`;
+    }
+  );
+
+  formattedContent = formattedContent.replace(
     /^•\s/gm,
     '<span class="bullet-point">•</span> '
   );
@@ -198,83 +200,6 @@ const formatResponse = (content: string) => {
 
   return formattedContent;
 };
-
-function TechBackdrop() {
-  const icons = [
-    {
-      Icon: Database,
-      className: "left-[7%] top-[16%] size-11",
-      motion: "tech-glyph-drift",
-      delay: "0s",
-      duration: "11s",
-    },
-    {
-      Icon: Braces,
-      className: "right-[9%] top-[20%] size-12",
-      motion: "tech-glyph-float",
-      delay: "0.8s",
-      duration: "9s",
-    },
-    {
-      Icon: Code2,
-      className: "left-[12%] bottom-[26%] size-10",
-      motion: "tech-glyph-glow",
-      delay: "1.4s",
-      duration: "8s",
-    },
-    {
-      Icon: Terminal,
-      className: "right-[14%] bottom-[22%] size-10",
-      motion: "tech-glyph-drift-alt",
-      delay: "0.4s",
-      duration: "10s",
-    },
-    {
-      Icon: Cpu,
-      className: "left-[38%] top-[10%] size-9",
-      motion: "tech-glyph-float",
-      delay: "1.8s",
-      duration: "12s",
-    },
-    {
-      Icon: GitBranch,
-      className: "right-[34%] bottom-[12%] size-9",
-      motion: "tech-glyph-glow",
-      delay: "2.2s",
-      duration: "7.5s",
-    },
-    {
-      Icon: Server,
-      className: "left-[22%] top-[42%] size-8",
-      motion: "tech-glyph-drift",
-      delay: "2.8s",
-      duration: "13s",
-    },
-    {
-      Icon: Database,
-      className: "right-[22%] top-[48%] size-8",
-      motion: "tech-glyph-drift-alt",
-      delay: "1.1s",
-      duration: "9.5s",
-    },
-  ] as const;
-
-  return (
-    <div className="tech-backdrop" aria-hidden>
-      <div className="tech-orb tech-orb-a" />
-      <div className="tech-orb tech-orb-b" />
-      <div className="tech-orb tech-orb-c" />
-      {icons.map(({ Icon, className, motion, delay, duration }, i) => (
-        <Icon
-          key={i}
-          className={`tech-glyph absolute ${motion} ${className}`}
-          style={{ animationDelay: delay, animationDuration: duration }}
-          strokeWidth={1.2}
-        />
-      ))}
-    </div>
-  );
-}
 
 const TypingIndicator = () => (
   <div className="flex items-start gap-3 max-w-[85%] animate-fade-in">
@@ -365,10 +290,7 @@ const PortfolioChat = () => {
         const normalized = Math.abs(value - 128) / 128;
         const barHeight = Math.max(2, normalized * canvas.height * 0.9);
 
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, "hsla(217, 92%, 62%, 0.9)");
-        gradient.addColorStop(1, "hsla(262, 80%, 68%, 0.9)");
-        ctx.fillStyle = gradient;
+        ctx.fillStyle = "hsla(210, 90%, 58%, 0.85)";
 
         const x = i * barWidth + 1;
         const y = (canvas.height - barHeight) / 2;
@@ -663,9 +585,7 @@ const PortfolioChat = () => {
     });
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden">
-      <TechBackdrop />
-
+    <div className="relative min-h-screen flex flex-col">
       <main
         className={`relative z-10 flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 ${
           hasChat ? "pt-8 pb-4 justify-start" : "justify-center py-10"
@@ -682,10 +602,8 @@ const PortfolioChat = () => {
               <div className="absolute inset-0 rounded-full avatar-speaking-ring" />
             )}
             <Avatar
-              className={`mx-auto border border-white/15 transition-all duration-500 ${
-                isSpeaking
-                  ? "shadow-[0_0_50px_hsl(217_92%_62%/0.4)] scale-105"
-                  : "shadow-[0_0_40px_hsl(217_92%_62%/0.18)]"
+              className={`mx-auto border border-white/10 transition-all duration-300 ${
+                isSpeaking ? "ring-2 ring-primary/40" : ""
               } ${
                 hasChat ? "w-16 h-16" : "w-24 h-24 sm:w-28 sm:h-28"
               }`}
@@ -702,7 +620,7 @@ const PortfolioChat = () => {
           </div>
 
           <h1
-            className={`font-[family-name:var(--font-syne)] font-extrabold gradient-text tracking-tight ${
+            className={`font-[family-name:var(--font-syne)] font-bold text-foreground tracking-tight ${
               hasChat
                 ? "text-3xl sm:text-4xl mb-1"
                 : "text-4xl sm:text-5xl lg:text-6xl mb-3"
@@ -724,6 +642,21 @@ const PortfolioChat = () => {
                 Developer with {getExperienceLabel()} years of experience (Spring Boot + Angular). Ask
                 me about SlantPOS, TechPlusNexus, skills, or my background.
               </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl">
+                {portfolioHighlights.map((item) => (
+                  <div
+                    key={item.label}
+                    className="stat-card rounded-lg px-3 py-3 text-center"
+                  >
+                    <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums">
+                      {item.value}
+                    </p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-snug">
+                      {item.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
               <a 
                 href="https://portfolio.divyanshraj.in" 
                 target="_blank" 
@@ -820,7 +753,7 @@ const PortfolioChat = () => {
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping}
               size="icon"
-              className="send-chip h-11 w-11 rounded-xl text-primary hover:text-primary disabled:opacity-40"
+              className="send-chip h-11 w-11 rounded-xl disabled:opacity-40"
               variant="ghost"
               aria-label="Send message"
             >

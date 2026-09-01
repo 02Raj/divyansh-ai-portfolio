@@ -20,6 +20,14 @@ export function getExperienceLabel(): string {
   return `${Math.floor(parseFloat(getExperienceYears()))}+`;
 }
 
+/** Landing-page stats — quantifiable, auto-updating where possible */
+export const portfolioHighlights = [
+  { value: `${getExperienceLabel()} yrs`, label: "Production experience" },
+  { value: "5", label: "Shipped products" },
+  { value: "15+", label: "SlantPOS modules" },
+  { value: "3", label: "Live deployments" },
+] as const;
+
 /** Compact resume — keep fields short to cut Sarvam prompt tokens. */
 export const resumeData = {
   name: "Divyansh Raj",
@@ -48,6 +56,7 @@ export const resumeData = {
         "Voice/text agentic AI assistant for AWS cloud ops; human-in-the-loop safety for write ops, security audits, cost monitoring, phone alerts via Bolna AI",
       stack: "Python, FastAPI, Amazon Bedrock (Claude), Boto3, Whisper, Amazon Polly, Docker",
       live: "",
+      metrics: ["10+ AWS services monitored", "Voice + text agent", "Human-in-the-loop for write ops"],
     },
     {
       name: "DoctorFlow (ClinicDesk)",
@@ -56,6 +65,7 @@ export const resumeData = {
         "Clinic management SaaS: appointments, patient records, WhatsApp automation, AI document analysis, billing; multi-clinic support",
       stack: "React, TypeScript, Firebase, Firestore, Sarvam AI, Twilio, Vercel",
       live: "clinic-desk-app.vercel.app",
+      metrics: ["Multi-clinic support", "WhatsApp appointment automation", "AI document analysis"],
     },
     {
       name: "TutorPe",
@@ -64,6 +74,7 @@ export const resumeData = {
         "Ed-tech SaaS platform for tutors: student management, attendance, fee tracking, batch scheduling, WhatsApp notifications",
       stack: "Next.js, TypeScript, Firebase, Firestore, Vercel",
       live: "tutorpe.in",
+      metrics: ["Live at tutorpe.in", "Attendance + fee tracking", "Batch scheduling + WhatsApp alerts"],
     },
     {
       name: "SlantPOS",
@@ -72,6 +83,7 @@ export const resumeData = {
         "Restaurant POS: orders, billing, KDS, inventory, feedback; realtime front-desk↔kitchen workflows",
       stack: "Angular, Spring Boot, PostgreSQL, MongoDB, WebSocket",
       live: "",
+      metrics: ["15+ integrated modules", "WebSocket realtime KDS sync", "2+ years in production"],
     },
     {
       name: "TechPlusNexus",
@@ -80,6 +92,7 @@ export const resumeData = {
         "AI blog platform (Gemini): auth, categories, AI posts; Spring Boot+JWT+MongoDB; AWS EC2/NGINX/SSL, S3 frontend, CloudWatch, Route53",
       stack: "React, Spring Boot, MongoDB, Gemini, AWS",
       live: "techplusnexus.fun",
+      metrics: ["Full AWS deploy (EC2/S3/Route53)", "JWT-secured API", "Gemini-powered content generation"],
     },
   ],
   education:
@@ -133,7 +146,7 @@ export function contextForIntent(
       return data.projects
         .map(
           (p) =>
-            `${p.name} (${p.period}): ${p.blurb}. Stack: ${p.stack}.${
+            `${p.name} (${p.period}): ${p.blurb}. Stack: ${p.stack}. Metrics: ${p.metrics.join("; ")}.${
               p.live ? ` Live: ${p.live}` : ""
             }`
         )

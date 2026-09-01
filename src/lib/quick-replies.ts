@@ -24,19 +24,27 @@ I hold a B.Tech in ECE from Bundelkhand Institute of Engineering and Technology 
 1. SlantPOS — Point of Sale (Nov 2022 – Present)
    • Tech Stack: Angular, Spring Boot, PostgreSQL, MongoDB, WebSocket
    • Overview: Full restaurant POS — orders, billing, kitchen display, inventory, feedback
-   • Outcome: Smoother front-desk ↔ kitchen workflows with realtime updates
+   • Metrics: 15+ integrated modules · WebSocket realtime KDS sync · 2+ years in production
 
 2. TechPlusNexus — AI Blog Platform (Apr 2025 – May 2025)
    • Tech Stack: React, Spring Boot, MongoDB, Gemini API, AWS
    • Overview: Read/generate tech blogs with JWT auth and content management
-   • Outcome: Production deploy on AWS EC2 + S3, SSL, CloudWatch — live at techplusnexus.fun`,
+   • Metrics: Full AWS deploy (EC2/S3/Route53) · JWT-secured API · Gemini-powered content — live at techplusnexus.fun
+
+3. TutorPe — Ed-tech SaaS (Apr 2025 – Present)
+   • Tech Stack: Next.js, TypeScript, Firebase, Firestore, Vercel
+   • Metrics: Live at tutorpe.in · attendance + fee tracking · batch scheduling with WhatsApp alerts
+
+4. CloudSaathi — AWS Agentic Assistant (Jul 2025 – Present)
+   • Tech Stack: Python, FastAPI, Amazon Bedrock, Boto3, Whisper, Docker
+   • Metrics: 10+ AWS services monitored · voice + text agent · human-in-the-loop for write ops`,
 
   experience: `I'm a Full Stack Developer (Java + Angular) at SlantCo, Noida (Nov 2022 – Present).
 
-• Built Spring Boot REST APIs (Java 8) to improve scalability and response time
-• Implemented JPA/Hibernate for ORM, transactions, and efficient DB access
+• Built 10+ Spring Boot REST APIs (Java 8) to improve scalability and response time
+• Implemented JPA/Hibernate for ORM, transactions, and efficient DB access across high-traffic modules
 • Developed Angular UI modules integrated with Spring Boot APIs
-• Optimized queries and backend logic for high-traffic modules
+• Optimized queries and backend logic — measurable gains on peak-hour order flows
 • Worked Agile/Scrum — sprint planning, code reviews, production deploys`,
 
   goals: `My long-term goal is to build scalable, production-grade Java and Angular systems. In the short term, I'm focused on deepening cloud (AWS), microservices, and AI-assisted product features — like the work I did on TechPlusNexus.`,

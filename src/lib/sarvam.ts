@@ -133,7 +133,7 @@ function instructionFor(intent: Intent): string {
     case "skills":
       return "List skills in short bullets by category (Languages, Frontend, Backend, DB, Cloud, Tools). Max ~100 words.";
     case "projects":
-      return "List each project: name, stack, 1–2 line overview, outcome if clear. Max ~150 words.";
+      return "List each project: name, stack, 1–2 line overview, and 1–2 quantifiable metrics (numbers, counts, uptime, modules, users, etc.) from facts. Max ~180 words.";
     case "experience":
       return "Summarize current role + bullets from facts. Max ~120 words.";
     case "goals":
