@@ -1,4 +1,5 @@
 import { Schema, models, model } from "mongoose";
+import { purgeStaleCaches } from "@/lib/cache-purge";
 import { connectMongo } from "@/lib/mongo";
 
 const HeartbeatSchema = new Schema(
@@ -20,6 +21,12 @@ const Heartbeat =
 export async function pingMongoKeepAlive(): Promise<{
   ok: boolean;
   lastPingAt?: string;
+  cachePurge?: {
+    ttlDays: number;
+    deletedResponses: number;
+    deletedVoices: number;
+    error?: string;
+  };
   error?: string;
 }> {
   const conn = await connectMongo();
@@ -35,7 +42,19 @@ export async function pingMongoKeepAlive(): Promise<{
       { key: "atlas", lastPingAt: now, note: "keepalive" },
       { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     );
-    return { ok: true, lastPingAt: now.toISOString() };
+
+    const cachePurge = await purgeStaleCaches();
+
+    return {
+      ok: true,
+      lastPingAt: now.toISOString(),
+      cachePurge: {
+        ttlDays: cachePurge.ttlDays,
+        deletedResponses: cachePurge.deletedResponses,
+        deletedVoices: cachePurge.deletedVoices,
+        error: cachePurge.error,
+      },
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown keepalive error";

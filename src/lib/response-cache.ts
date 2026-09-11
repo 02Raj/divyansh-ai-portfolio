@@ -1,4 +1,9 @@
 import { Schema, models, model, type InferSchemaType } from "mongoose";
+import {
+  cacheExpiryCutoff,
+  getCacheTtlSeconds,
+  isCacheStale,
+} from "@/lib/cache-ttl";
 import { connectMongo } from "@/lib/mongo";
 
 const CachedResponseSchema = new Schema(
@@ -9,6 +14,39 @@ const CachedResponseSchema = new Schema(
   },
   { timestamps: true }
 );
+
+CachedResponseSchema.index(
+  { updatedAt: 1 },
+  {
+    expireAfterSeconds: getCacheTtlSeconds(),
+    name: "cache_ttl_updatedAt",
+  }
+);
+
+let responseTtlIndexSynced = false;
+
+export async function ensureResponseCacheTtlIndex(): Promise<void> {
+  if (responseTtlIndexSynced) return;
+  const conn = await connectMongo();
+  if (!conn) return;
+  try {
+    await CachedResponse.syncIndexes();
+    responseTtlIndexSynced = true;
+  } catch (error) {
+    console.error("Response cache TTL index sync failed:", error);
+  }
+}
+
+export async function purgeStaleResponseCache(): Promise<number> {
+  const conn = await connectMongo();
+  if (!conn) return 0;
+  await ensureResponseCacheTtlIndex();
+  const cutoff = cacheExpiryCutoff();
+  const result = await CachedResponse.deleteMany({
+    updatedAt: { $lt: cutoff },
+  });
+  return result.deletedCount;
+}
 
 export type CachedResponseDoc = InferSchemaType<typeof CachedResponseSchema>;
 
@@ -37,8 +75,17 @@ export async function getCachedAnswer(key: CacheKey): Promise<string | null> {
   if (!conn) return null;
 
   try {
+    await ensureResponseCacheTtlIndex();
     const doc = await CachedResponse.findOne({ key }).lean();
-    return doc?.answer?.trim() || null;
+    if (!doc?.answer?.trim()) return null;
+
+    const updatedAt = (doc as { updatedAt?: Date }).updatedAt;
+    if (isCacheStale(updatedAt)) {
+      await CachedResponse.deleteOne({ key });
+      return null;
+    }
+
+    return doc.answer.trim();
   } catch (error) {
     console.error("Cache read failed:", error);
     return null;

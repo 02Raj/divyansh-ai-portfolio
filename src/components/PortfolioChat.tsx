@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getExperienceLabel, portfolioHighlights } from "@/lib/resume-data";
+import { attachmentForPrompt, type MessageAttachment } from "@/lib/chat-attachments";
+import { getExperienceLabel, getExperienceYears, portfolioHighlights } from "@/lib/resume-data";
+import { ProjectShowcaseCards } from "@/components/ProjectShowcaseCards";
+import { HireContactCard } from "@/components/HireContactCard";
+import { RecruiterBar } from "@/components/RecruiterBar";
+import { HowItWorks } from "@/components/HowItWorks";
+import { XLogo } from "@/components/icons/XLogo";
+import { siteLinks, trackedLinks } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +28,7 @@ interface ChatMessage {
   timestamp: Date;
   audioBase64?: string;
   isStreaming?: boolean;
+  attachment?: MessageAttachment;
 }
 
 const PROFILE_SRC = "/divyansh-profile.jpg";
@@ -74,29 +82,38 @@ function StreamingMessage({ message, onStreamDone, playAudio }: {
 
   const text = message.type === "assistant" ? displayed : message.content;
   const htmlContent = message.type === "assistant" ? formatResponse(text) : text;
+  const streamComplete = !message.isStreaming || done;
+  const showAttachments =
+    message.type === "assistant" && message.attachment && streamComplete;
 
   return (
-    <div className={`rounded-2xl px-4 py-3 ${message.type === "user" ? "msg-user" : "msg-assistant"}`}>
-      <div
-        className="whitespace-pre-wrap leading-relaxed text-sm sm:text-[0.95rem] formatted-content"
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
-      />
-      <div className="flex items-center justify-between mt-2">
-        <p className="text-[11px] opacity-50">
-          {formatTime(message.timestamp)}
-        </p>
-        {message.type === "assistant" && message.audioBase64 && (
-          <button
-            type="button"
-            onClick={() => playAudio(message.audioBase64!)}
-            className="voice-replay-btn ml-2 p-1 rounded-md hover:bg-white/10 transition-colors"
-            aria-label="Replay voice"
-            title="Replay voice"
-          >
-            <Volume2 className="w-3.5 h-3.5 text-primary/70" />
-          </button>
-        )}
+    <div className="min-w-0 flex-1">
+      <div className={`rounded-2xl px-4 py-3 ${message.type === "user" ? "msg-user" : "msg-assistant"}`}>
+        <div
+          className="whitespace-pre-wrap leading-relaxed text-sm sm:text-[0.95rem] formatted-content"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[11px] opacity-50">
+            {formatTime(message.timestamp)}
+          </p>
+          {message.type === "assistant" && message.audioBase64 && (
+            <button
+              type="button"
+              onClick={() => playAudio(message.audioBase64!)}
+              className="voice-replay-btn ml-2 p-1 rounded-md hover:bg-white/10 transition-colors"
+              aria-label="Replay voice"
+              title="Replay voice"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-primary/70" />
+            </button>
+          )}
+        </div>
       </div>
+      {showAttachments && message.attachment === "projects" && (
+        <ProjectShowcaseCards />
+      )}
+      {showAttachments && message.attachment === "hire" && <HireContactCard />}
     </div>
   );
 }
@@ -244,7 +261,6 @@ const PortfolioChat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => Date.now().toString());
   const [clickedTopics, setClickedTopics] = useState<Set<string>>(new Set());
-  const [hasClickedAny, setHasClickedAny] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -303,6 +319,7 @@ const PortfolioChat = () => {
   }, []);
 
   const quickActions = [
+    { id: "intro", label: "▶ Quick intro", emoji: "▶" },
     { id: "about", label: "👋 Tell me about yourself", emoji: "👋" },
     { id: "skills", label: "🔧 Technical skills", emoji: "🔧" },
     { id: "projects", label: "🚀 Recent projects", emoji: "🚀" },
@@ -330,8 +347,14 @@ const PortfolioChat = () => {
     ]);
     setIsTyping(true);
 
+    const attachment = attachmentForPrompt(trimmed);
+    const apiPrompt =
+      trimmed === "▶ Quick intro"
+        ? "Give me a concise 30-second professional intro for a recruiter: role, years, top 2 projects with one metric each, and that I'm open to opportunities."
+        : trimmed;
+
     try {
-      const data = await askPortfolio(trimmed, sessionId);
+      const data = await askPortfolio(apiPrompt, sessionId);
       setMessages((prev) => [
         ...prev,
         {
@@ -340,6 +363,7 @@ const PortfolioChat = () => {
           content: data.answer,
           timestamp: new Date(),
           isStreaming: true,
+          attachment,
         },
       ]);
     } catch (error) {
@@ -361,14 +385,7 @@ const PortfolioChat = () => {
   const handleQuickAction = async (actionId: string) => {
     const action = quickActions.find((a) => a.id === actionId);
     if (!action) return;
-
-    if (!hasClickedAny) {
-      setClickedTopics(new Set([actionId]));
-      setHasClickedAny(true);
-    } else {
-      setClickedTopics(new Set(quickActions.map((a) => a.id)));
-    }
-
+    setClickedTopics((prev) => new Set(prev).add(actionId));
     await sendPrompt(action.label);
   };
 
@@ -513,6 +530,7 @@ const PortfolioChat = () => {
 
           // Add assistant message with audio + streaming
           const assistantId = (Date.now() + 1).toString();
+          const voiceAttachment = attachmentForPrompt(data.transcript);
           setMessages((prev) => [
             ...prev,
             {
@@ -522,6 +540,7 @@ const PortfolioChat = () => {
               timestamp: new Date(),
               audioBase64: data.audioBase64 || undefined,
               isStreaming: true,
+              attachment: voiceAttachment,
             },
           ]);
 
@@ -586,9 +605,10 @@ const PortfolioChat = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col">
+      <RecruiterBar />
       <main
         className={`relative z-10 flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 ${
-          hasChat ? "pt-8 pb-4 justify-start" : "justify-center py-10"
+          hasChat ? "pt-6 pb-4 justify-start" : "justify-center py-8"
         }`}
       >
         <section
@@ -629,24 +649,27 @@ const PortfolioChat = () => {
             Divyansh Raj
           </h1>
           <p
-            className={`text-foreground/90 font-medium ${
-              hasChat ? "text-sm mb-0" : "text-lg sm:text-xl mb-5"
+            className={`text-primary font-medium ${
+              hasChat ? "text-xs sm:text-sm mb-0" : "text-base sm:text-lg mb-2"
             }`}
           >
-            AI Portfolio Assistant
+            Java Full-Stack · Spring Boot & Angular · Noida
           </p>
           {!hasChat && (
             <div className="flex flex-col items-center gap-5">
               <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed text-base sm:text-[1.05rem]">
-                Welcome to my interactive AI portfolio! I&apos;m a Java Full-Stack
-                Developer with {getExperienceLabel()} years of experience (Spring Boot + Angular). Ask
-                me about SlantPOS, TechPlusNexus, skills, or my background.
+                {getExperienceYears()} years shipping production POS & SaaS (SlantPOS,
+                TechPlusNexus, TutorPe). Chat or use voice — ask about stack,
+                metrics, or hiring.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl">
                 {portfolioHighlights.map((item) => (
-                  <div
+                  <button
                     key={item.label}
-                    className="stat-card rounded-lg px-3 py-3 text-center"
+                    type="button"
+                    disabled={isTyping}
+                    onClick={() => sendPrompt(item.prompt)}
+                    className="stat-card rounded-lg px-3 py-3 text-center hover:border-primary/30 transition-colors disabled:opacity-50 text-left sm:text-center"
                   >
                     <p className="text-lg sm:text-xl font-semibold text-foreground tabular-nums">
                       {item.value}
@@ -654,11 +677,12 @@ const PortfolioChat = () => {
                     <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-snug">
                       {item.label}
                     </p>
-                  </div>
+                  </button>
                 ))}
               </div>
+              <HowItWorks />
               <a 
-                href="https://portfolio.divyanshraj.in" 
+                href={trackedLinks.standardPortfolio("hero")} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground text-sm font-medium hover:bg-white/10 transition-colors border border-white/5 shadow-sm"
@@ -679,7 +703,13 @@ const PortfolioChat = () => {
                   message.type === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div className="flex items-start gap-3 max-w-[92%] sm:max-w-[85%]">
+                <div
+                  className={`flex items-start gap-3 w-full ${
+                    message.type === "assistant" && message.attachment
+                      ? "max-w-[98%] sm:max-w-[95%]"
+                      : "max-w-[92%] sm:max-w-[85%]"
+                  }`}
+                >
                   {message.type === "assistant" && (
                     <Avatar className="w-8 h-8 border border-white/10 shrink-0 mt-1">
                       <AvatarImage src={PROFILE_SRC} alt="Divyansh Raj" />
@@ -762,36 +792,52 @@ const PortfolioChat = () => {
           </div>
 
           <div className="mt-5 flex flex-wrap justify-center gap-2.5">
-            {quickActions
-              .filter((action) => !clickedTopics.has(action.id))
-              .map((action) => (
-                <button
-                  key={action.id}
-                  type="button"
-                  onClick={() => handleQuickAction(action.id)}
-                  disabled={isTyping}
-                  className="topic-pill rounded-full px-3.5 py-2 text-sm text-foreground/90 disabled:opacity-50"
-                >
-                  <span className="mr-1.5">{action.emoji}</span>
-                  {action.label.replace(action.emoji, "").trim()}
-                </button>
-              ))}
+            {quickActions.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                onClick={() => handleQuickAction(action.id)}
+                disabled={isTyping}
+                className={`topic-pill rounded-full px-3.5 py-2 text-sm text-foreground/90 disabled:opacity-50 ${
+                  clickedTopics.has(action.id) ? "opacity-70" : ""
+                }`}
+              >
+                <span className="mr-1.5">{action.emoji}</span>
+                {action.label.replace(action.emoji, "").trim()}
+              </button>
+            ))}
           </div>
         </section>
       </main>
 
-      <footer className="relative z-10 mt-auto border-t border-white/5 py-5 flex flex-col sm:flex-row items-center justify-center gap-2 text-center text-xs sm:text-sm text-muted-foreground/70">
-        <p>
-          © 2025 Divyansh Raj. All rights reserved.
-        </p>
+      <footer className="relative z-10 mt-auto border-t border-white/5 py-5 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-xs sm:text-sm text-muted-foreground/70 px-4">
+        <p>© 2025 Divyansh Raj. All rights reserved.</p>
         <a
-          href="https://github.com/02Raj"
+          href={trackedLinks.github("footer")}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 hover:text-primary transition-colors"
         >
           <GitBranch className="w-4 h-4" />
           <span>GitHub</span>
+        </a>
+        <a
+          href={trackedLinks.x("footer")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 hover:text-primary transition-colors"
+          title={siteLinks.xHandle}
+        >
+          <XLogo className="w-4 h-4" />
+          <span>{siteLinks.xHandle}</span>
+        </a>
+        <a
+          href={trackedLinks.prepHub("footer")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary transition-colors"
+        >
+          Interview prep hub
         </a>
       </footer>
     </div>

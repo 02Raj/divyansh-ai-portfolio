@@ -29,7 +29,9 @@ gh repo create divyansh-ai-portfolio --private --source=. --remote=origin --push
 
 Quick Topics (skills / projects / experience / …) are stored in MongoDB after the first answer — later clicks are instant and cost **0 Sarvam tokens**.
 
-**Atlas keep-alive:** Vercel Cron hits `/api/cron/mongo-keepalive` every **5 days** (ping + tiny write) so the free cluster does not auto-pause from inactivity.
+**Cache expiry:** Text + voice quick-topic cache auto-expires after **17 days** by default (`CACHE_TTL_DAYS`, allowed range **15–20**). MongoDB TTL indexes delete stale rows; the same cron also purges anything older than the cutoff. After expiry, the next visit re-seeds from `quick-replies.ts` (or Sarvam if `SARVAM_FOR_QUICK=true`).
+
+**Atlas keep-alive:** Vercel Cron hits `/api/cron/mongo-keepalive` every **5 days** (ping + cache purge) so the free cluster does not auto-pause from inactivity.
 
 ## 3) Custom domain: portfolio.divyanshraj.in
 

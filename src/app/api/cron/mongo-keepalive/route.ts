@@ -31,7 +31,8 @@ export async function GET(request: Request) {
       ok: result.ok,
       lastPingAt: result.lastPingAt,
       error: result.error,
-      purpose: "atlas-keepalive",
+      purpose: "atlas-keepalive-and-cache-purge",
+      cachePurge: result.cachePurge,
     },
     { status: result.ok ? 200 : 503 }
   );

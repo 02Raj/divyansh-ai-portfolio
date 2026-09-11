@@ -20,12 +20,28 @@ export function getExperienceLabel(): string {
   return `${Math.floor(parseFloat(getExperienceYears()))}+`;
 }
 
-/** Landing-page stats — quantifiable, auto-updating where possible */
+/** Landing-page stats — tap to ask in chat */
 export const portfolioHighlights = [
-  { value: `${getExperienceLabel()} yrs`, label: "Production experience" },
-  { value: "5", label: "Shipped products" },
-  { value: "15+", label: "SlantPOS modules" },
-  { value: "3", label: "Live deployments" },
+  {
+    value: `${getExperienceLabel()} yrs`,
+    label: "Production experience",
+    prompt: "Summarize my work experience and years in production",
+  },
+  {
+    value: "5",
+    label: "Shipped products",
+    prompt: "🚀 Recent projects",
+  },
+  {
+    value: "15+",
+    label: "SlantPOS modules",
+    prompt: "Tell me about SlantPOS — stack, modules, and impact",
+  },
+  {
+    value: "3",
+    label: "Live deployments",
+    prompt: "Which projects are live in production? Include links and metrics",
+  },
 ] as const;
 
 /** Compact resume — keep fields short to cut Sarvam prompt tokens. */
