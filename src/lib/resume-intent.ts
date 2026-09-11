@@ -1,3 +1,4 @@
+import { prepHub } from "@/lib/prep-hub";
 import type { ResumeData } from "@/lib/resume-data";
 import { getExperienceLabel } from "@/lib/resume-data";
 
@@ -21,6 +22,21 @@ export function getStaticResumeAnswer(
 
   if (/\b(github|git hub|repo)\b/.test(p)) {
     return `Here's my GitHub: ${data.github} — you'll find my projects and code there.`;
+  }
+
+  if (
+    /\b(prep hub|learn with divyansh|interview prep hub|learn-with-divyansh|divyansh-s-prep)\b/.test(
+      p
+    )
+  ) {
+    return `${prepHub.name} — ${prepHub.tagline}
+
+📝 Documenting learnings (open digital notebook)
+🎯 SWE interview prep: DSA, System Design, Java, Spring Boot, Angular, and more
+🤝 Build-in-public community & open-source notes
+
+🔗 Live: ${prepHub.liveHost}
+💻 Source: ${prepHub.githubRepo}`;
   }
 
   if (/\b(where.*(live|based)|location|city)\b/.test(p)) {
@@ -55,7 +71,7 @@ export function isResumeRelated(prompt: string): boolean {
   const p = prompt.toLowerCase().trim();
 
   const signals = [
-    /\b(resume|cv|portfolio|background|profile)\b/,
+    /\b(resume|cv|portfolio|background|profile|prep hub|learn with divyansh)\b/,
     /\b(skill|stack|tech|technology|framework|language)\b/,
     /\b(project|slantpos|techplusnexus|tms|pos|blog)\b/,
     /\b(experience|work|role|job|career|company|slantco)\b/,

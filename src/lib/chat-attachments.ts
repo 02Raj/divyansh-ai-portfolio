@@ -8,6 +8,14 @@ export function attachmentForPrompt(prompt: string): MessageAttachment | undefin
 
   const p = prompt.toLowerCase();
 
+  if (
+    /\b(prep hub|learn with divyansh|interview prep hub|build[- ]?in[- ]?public|learn-with-divyansh)\b/.test(
+      p
+    )
+  ) {
+    return "projects";
+  }
+
   if (/\bhire\b|\bhiring\b|\brecruit\b/.test(p)) return "hire";
 
   if (

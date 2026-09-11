@@ -1,3 +1,5 @@
+import { prepHub } from "@/lib/prep-hub";
+import { siteLinks } from "@/lib/site-config";
 import { resumeData } from "@/lib/resume-data";
 
 export type ProjectCard = {
@@ -7,6 +9,10 @@ export type ProjectCard = {
   metric: string;
   stackTags: string[];
   liveUrl?: string;
+  githubUrl?: string;
+  variant?: "default" | "buildInPublic";
+  badge?: string;
+  bullets?: string[];
 };
 
 const FEATURED_ORDER = [
@@ -31,9 +37,29 @@ function stackTags(stack: string, max = 4): string[] {
     .slice(0, max);
 }
 
-/** Cards shown under project-related chat replies */
-export function getFeaturedProjectCards(): ProjectCard[] {
-  const cards: ProjectCard[] = [];
+function prepHubCard(): ProjectCard {
+  return {
+    variant: "buildInPublic",
+    badge: prepHub.tagline,
+    name: prepHub.name,
+    period: "Open source",
+    summary: "",
+    metric: "",
+    bullets: [
+      "📝 Documenting learnings — open notebook & portfolio extension",
+      "🎯 Interview prep — DSA, System Design, Java, Spring Boot, more",
+      "🤝 Community — open-source notes & collective learning",
+    ],
+    stackTags: ["Build in public", "Interview prep", "Docs"],
+    liveUrl: siteLinks.prepHub,
+    githubUrl: siteLinks.prepHubGithub,
+  };
+}
+
+/** Shown under chat when user asks about recent projects / prep hub */
+export function getProjectShowcaseCards(): ProjectCard[] {
+  const cards: ProjectCard[] = [prepHubCard()];
+
   for (const name of FEATURED_ORDER) {
     const p = resumeData.projects.find((proj) => proj.name === name);
     if (!p) continue;
@@ -48,4 +74,9 @@ export function getFeaturedProjectCards(): ProjectCard[] {
     });
   }
   return cards;
+}
+
+/** @deprecated use getProjectShowcaseCards */
+export function getFeaturedProjectCards(): ProjectCard[] {
+  return getProjectShowcaseCards().filter((c) => c.variant !== "buildInPublic");
 }

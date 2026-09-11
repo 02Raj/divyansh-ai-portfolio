@@ -36,11 +36,19 @@ export function RecruiterBar() {
           href={trackedLinks.x()}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 hover:text-primary transition-colors"
+          className="inline-flex p-0.5 rounded-md hover:text-primary transition-colors"
+          aria-label={`X profile ${siteLinks.xHandle}`}
           title={siteLinks.xHandle}
         >
           <XLogo className="w-3.5 h-3.5" />
-          X
+        </a>
+        <a
+          href={trackedLinks.prepHub()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 hover:text-primary transition-colors"
+        >
+          Prep Hub
         </a>
         <a
           href={trackedLinks.resume()}

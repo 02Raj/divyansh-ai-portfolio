@@ -1,3 +1,5 @@
+import { prepHubContextBlock } from "@/lib/prep-hub";
+
 /**
  * Joining date — single source of truth for experience calculation.
  * Divyansh joined SlantCo as a fresher on 8 Nov 2022.
@@ -146,6 +148,7 @@ export function contextForIntent(
         data.summary,
         `${data.role} @ ${data.company} (${data.duration})`,
         `Projects: ${data.projects.map((p) => p.name).join(", ")}`,
+        prepHubContextBlock(),
         data.education,
       ].join("\n");
     case "skills":
@@ -159,14 +162,17 @@ export function contextForIntent(
         `Tools: ${data.skills.tools}`,
       ].join("\n");
     case "projects":
-      return data.projects
-        .map(
-          (p) =>
-            `${p.name} (${p.period}): ${p.blurb}. Stack: ${p.stack}. Metrics: ${p.metrics.join("; ")}.${
-              p.live ? ` Live: ${p.live}` : ""
-            }`
-        )
-        .join("\n");
+      return [
+        prepHubContextBlock(),
+        data.projects
+          .map(
+            (p) =>
+              `${p.name} (${p.period}): ${p.blurb}. Stack: ${p.stack}. Metrics: ${p.metrics.join("; ")}.${
+                p.live ? ` Live: ${p.live}` : ""
+              }`
+          )
+          .join("\n"),
+      ].join("\n\n");
     case "experience":
       return [
         `${data.role} @ ${data.company} (${data.duration})`,
@@ -181,6 +187,7 @@ export function contextForIntent(
         data.summary,
         `Skills: ${data.skills.languages}; ${data.skills.backend}; ${data.skills.frontend}`,
         `Projects: ${data.projects.map((p) => `${p.name} (${p.stack})`).join("; ")}`,
+        prepHubContextBlock(),
       ].join("\n");
   }
 }

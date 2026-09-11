@@ -825,11 +825,11 @@ const PortfolioChat = () => {
           href={trackedLinks.x("footer")}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 hover:text-primary transition-colors"
+          className="inline-flex p-1 rounded-md hover:text-primary transition-colors"
+          aria-label={`X profile ${siteLinks.xHandle}`}
           title={siteLinks.xHandle}
         >
           <XLogo className="w-4 h-4" />
-          <span>{siteLinks.xHandle}</span>
         </a>
         <a
           href={trackedLinks.prepHub("footer")}
@@ -837,7 +837,7 @@ const PortfolioChat = () => {
           rel="noopener noreferrer"
           className="hover:text-primary transition-colors"
         >
-          Interview prep hub
+          Learn with Divyansh (Prep Hub)
         </a>
       </footer>
     </div>

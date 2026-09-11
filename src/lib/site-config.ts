@@ -9,7 +9,8 @@ export const siteLinks = {
   resume: "https://portfolio.divyanshraj.in",
   x: "https://x.com/Divyans50724144",
   xHandle: "@Divyans50724144",
-  prepHub: "https://divyansh-s-prep-hub.vercel.app",
+  prepHub: "https://learn-with-divyansh.vercel.app",
+  prepHubGithub: "https://github.com/02Raj/divyansh-s-prep-hub",
 } as const;
 
 const UTM_SOURCE = "ai_portfolio";
@@ -50,4 +51,6 @@ export const trackedLinks = {
     trackedUrl(siteLinks.x, { campaign, content: "x" }),
   prepHub: (campaign = "footer") =>
     trackedUrl(siteLinks.prepHub, { campaign, content: "prep_hub" }),
+  prepHubGithub: (campaign = "footer") =>
+    trackedUrl(siteLinks.prepHubGithub, { campaign, content: "prep_hub_source" }),
 } as const;

@@ -39,11 +39,11 @@ export function HireContactCard() {
           href={trackedLinks.x("hire_card")}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border border-border bg-secondary hover:bg-secondary/80 transition-colors"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-border bg-secondary hover:bg-secondary/80 transition-colors"
+          aria-label={`Message on X ${siteLinks.xHandle}`}
           title={siteLinks.xHandle}
         >
           <XLogo className="w-3.5 h-3.5" />
-          X / DM
         </a>
       </div>
     </div>
