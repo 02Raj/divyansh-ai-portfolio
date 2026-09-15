@@ -26,18 +26,22 @@ I hold a B.Tech in ECE from Bundelkhand Institute of Engineering and Technology 
    • Overview: Full restaurant POS — orders, billing, kitchen display, inventory, feedback
    • Metrics: 15+ integrated modules · WebSocket realtime KDS sync · 2+ years in production
 
-2. TechPlusNexus — AI Blog Platform (Apr 2025 – May 2025)
+2. CiteMind — Grounded document Q&A (Sep 2026)
+   • Tech Stack: Java, Spring Boot, Angular, PostgreSQL, pgvector, JWT, Spring AI, Gemini, SSE
+   • Overview: Upload PDF/Markdown, retrieve cited chunks, then LLM; insufficient_context if no match
+   • Metrics: RAG + citations · SSE streaming · github.com/02Raj/citemind-
+
+3. TechPlusNexus — AI Blog Platform (Apr 2025 – May 2025)
    • Tech Stack: React, Spring Boot, MongoDB, Gemini API, AWS
-   • Overview: Read/generate tech blogs with JWT auth and content management
-   • Metrics: Full AWS deploy (EC2/S3/Route53) · JWT-secured API · Gemini-powered content — live at techplusnexus.fun
+   • Metrics: Full AWS deploy · JWT API · live at techplusnexus.fun
 
-3. TutorPe — Ed-tech SaaS (Apr 2025 – Present)
-   • Tech Stack: Next.js, TypeScript, Firebase, Firestore, Vercel
-   • Metrics: Live at tutorpe.in · attendance + fee tracking · batch scheduling with WhatsApp alerts
+4. Razorpay Clone Backend (2025)
+   • Tech Stack: Spring Boot, PostgreSQL, Spring Data JPA
+   • Overview: Payment gateway-style REST backend inspired by Razorpay
+   • Metrics: JPA + PostgreSQL · github.com/02Raj/razorpay-clone-backend
 
-4. CloudSaathi — AWS Agentic Assistant (Jul 2025 – Present)
-   • Tech Stack: Python, FastAPI, Amazon Bedrock, Boto3, Whisper, Docker
-   • Metrics: 10+ AWS services monitored · voice + text agent · human-in-the-loop for write ops`,
+5. TutorPe — Ed-tech SaaS (Apr 2025 – Present)
+   • Metrics: Live at tutorpe.in · fee tracking · WhatsApp alerts`,
 
   experience: `I'm a Full Stack Developer (Java + Angular) at SlantCo, Noida (Nov 2022 – Present).
 

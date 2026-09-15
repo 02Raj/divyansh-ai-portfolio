@@ -127,6 +127,9 @@ const formatResponse = (content: string) => {
   const projectHighlights = [
     "TechPlusNexus",
     "SlantPOS",
+    "CiteMind",
+    "citemind",
+    "razorpay-clone-backend",
     "techplusnexus.fun",
   ];
 

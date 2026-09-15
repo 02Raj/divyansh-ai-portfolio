@@ -1,4 +1,5 @@
 import { ExternalLink, GitBranch } from "lucide-react";
+// GitBranch used for repo links (lucide has no Github export in this version)
 import { getProjectShowcaseCards } from "@/lib/featured-projects";
 import { prepHub } from "@/lib/prep-hub";
 import { trackedLinks } from "@/lib/site-config";
@@ -74,7 +75,18 @@ function ProductCard({ project }: { project: ReturnType<typeof getProjectShowcas
           </span>
         ))}
       </div>
-      {liveHref && (
+      {project.githubUrl && (
+        <a
+          href={project.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+        >
+          Source code
+          <GitBranch className="w-3 h-3" />
+        </a>
+      )}
+      {liveHref && !project.githubUrl && (
         <a
           href={liveHref}
           target="_blank"

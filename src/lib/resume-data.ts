@@ -30,7 +30,7 @@ export const portfolioHighlights = [
     prompt: "Summarize my work experience and years in production",
   },
   {
-    value: "5",
+    value: "7+",
     label: "Shipped products",
     prompt: "🚀 Recent projects",
   },
@@ -67,6 +67,24 @@ export const resumeData = {
     "Agile/Scrum: sprints, reviews, production deploys",
   ],
   projects: [
+    {
+      name: "CiteMind",
+      period: "Sep 2026",
+      blurb:
+        "Private-document Q&A: upload PDF/Markdown, retrieve chunks with citations, then Gemini (Spring AI); returns insufficient_context if nothing relevant — grounded RAG, not a generic chat wrapper",
+      stack: "Java, Spring Boot, Angular, PostgreSQL, pgvector, JWT, Apache Tika, Spring AI, Gemini, SSE",
+      live: "github.com/02Raj/citemind-",
+      metrics: ["RAG + citations", "SSE streaming answers", "JWT-secured ingest & chat"],
+    },
+    {
+      name: "Razorpay Clone Backend",
+      period: "2025",
+      blurb:
+        "Payment gateway backend inspired by Razorpay: Spring Boot REST APIs, PostgreSQL, JPA — orders, payments, and gateway-style flows for portfolio fintech practice",
+      stack: "Java, Spring Boot, PostgreSQL, Spring Data JPA, REST",
+      live: "github.com/02Raj/razorpay-clone-backend",
+      metrics: ["Payment REST APIs", "PostgreSQL + JPA", "Razorpay-inspired gateway design"],
+    },
     {
       name: "CloudSaathi",
       period: "Jul 2025 – Present",
@@ -121,7 +139,7 @@ export const resumeData = {
     backend: "Spring Boot/MVC, JPA, Hibernate, FastAPI, REST, Microservices, JWT",
     databases: "MySQL, PostgreSQL, MongoDB, Firebase/Firestore",
     cloud: "AWS (EC2/S3/CloudWatch/IAM/Route53/Bedrock), Docker, Vercel, GitLab CI/CD",
-    ai: "Amazon Bedrock (Claude), Gemini, Sarvam AI, Whisper, Amazon Polly, Bolna AI",
+    ai: "RAG, pgvector, Spring AI, Gemini, Amazon Bedrock (Claude), Sarvam AI, Whisper, Amazon Polly, Bolna AI",
     tools: "IntelliJ, VS Code, Postman, Git, GitHub, JIRA",
   },
   goals:

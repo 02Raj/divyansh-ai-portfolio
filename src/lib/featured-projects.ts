@@ -17,9 +17,10 @@ export type ProjectCard = {
 
 const FEATURED_ORDER = [
   "SlantPOS",
+  "CiteMind",
   "TechPlusNexus",
+  "Razorpay Clone Backend",
   "TutorPe",
-  "CloudSaathi",
 ];
 
 function toLiveUrl(live: string): string | undefined {
@@ -64,13 +65,15 @@ export function getProjectShowcaseCards(): ProjectCard[] {
     const p = resumeData.projects.find((proj) => proj.name === name);
     if (!p) continue;
     const liveUrl = toLiveUrl(p.live);
+    const isGithub = liveUrl?.includes("github.com");
     cards.push({
       name: p.name,
       period: p.period,
       summary: p.blurb.split(";")[0]?.trim() ?? p.blurb,
       metric: p.metrics[0] ?? "",
       stackTags: stackTags(p.stack),
-      ...(liveUrl ? { liveUrl } : {}),
+      ...(liveUrl && !isGithub ? { liveUrl } : {}),
+      ...(isGithub && liveUrl ? { githubUrl: liveUrl } : {}),
     });
   }
   return cards;
