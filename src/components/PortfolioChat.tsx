@@ -138,6 +138,13 @@ const formatResponse = (content: string) => {
   const techHighlights = [
     "Angular",
     "Angular 19",
+    "Angular 20",
+    "signals",
+    "pgvector",
+    "RAG",
+    "Spring AI",
+    "Sarvam",
+    "Next.js",
     "React",
     "JavaScript",
     "TypeScript",

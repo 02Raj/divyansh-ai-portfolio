@@ -131,7 +131,7 @@ function instructionFor(intent: Intent): string {
     case "about":
       return "Write a short intro (max ~120 words): role, company, 1–2 projects, education, one personal touch (cricket/biryani ok).";
     case "skills":
-      return "List skills in short bullets by category (Languages, Frontend, Backend, DB, Cloud, Tools). Max ~100 words.";
+      return "List skills in short bullets by category (Languages, Frontend, Backend, DB, AI/RAG incl. pgvector & Spring AI, Cloud, Tools). Max ~140 words.";
     case "projects":
       return "List each project: name, stack, 1–2 line overview, and 1–2 quantifiable metrics (numbers, counts, uptime, modules, users, etc.) from facts. Max ~180 words.";
     case "experience":
@@ -152,7 +152,7 @@ function maxTokensFor(intent: Intent): number {
     case "experience":
       return 360;
     case "skills":
-      return 320;
+      return 380;
     case "goals":
       return 180;
     default:

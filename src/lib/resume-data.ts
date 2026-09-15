@@ -145,13 +145,16 @@ export const resumeData = {
   education:
     "B.Tech ECE, Bundelkhand Institute of Engineering and Technology, Jhansi (2017–2021)",
   skills: {
-    languages: "Java, JavaScript, TypeScript, Python, SQL",
-    frontend: "Angular 19, React, Next.js, Material, PrimeNG, RxJS, NgRx, HTML5, CSS3",
-    backend: "Spring Boot/MVC, JPA, Hibernate, FastAPI, REST, Microservices, JWT",
-    databases: "MySQL, PostgreSQL, MongoDB, Firebase/Firestore",
-    cloud: "AWS (EC2/S3/CloudWatch/IAM/Route53/Bedrock), Docker, Vercel, GitLab CI/CD",
-    ai: "RAG, pgvector, Spring AI, Gemini, Amazon Bedrock (Claude), Sarvam AI, Whisper, Amazon Polly, Bolna AI",
-    tools: "IntelliJ, VS Code, Postman, Git, GitHub, JIRA",
+    languages: "Java (Core & Advanced), JavaScript, TypeScript, Python, SQL",
+    frontend:
+      "Angular 19–20 (standalone, signals, lazy routes), Angular Material, PrimeNG, RxJS, NgRx, React, Next.js, HTML5, CSS3, responsive UI",
+    backend:
+      "Spring Boot 3.x, Spring MVC, Spring Data JPA, Hibernate, JDBC, REST APIs, Microservices, JWT, SSE, WebSocket, FastAPI",
+    databases: "PostgreSQL (pgvector / vector search), MySQL, MongoDB, Firebase/Firestore",
+    cloud: "AWS (EC2, S3, CloudWatch, IAM, Route 53, Bedrock), Docker, Vercel, GitLab CI/CD",
+    ai:
+      "RAG (chunking, embeddings, grounded citations), Spring AI, Gemini, Sarvam (STT, chat, Bulbul TTS), AWS Bedrock (Claude), Whisper, Amazon Polly, Bolna AI",
+    tools: "IntelliJ IDEA, VS Code, Postman, Git, GitHub, JIRA",
     dsa: `${leetcodeProfile.displayTotal} LeetCode solved (${leetcodeProfile.easy} Easy, ${leetcodeProfile.medium} Medium, ${leetcodeProfile.hard} Hard); arrays, strings, trees, DP, interview prep`,
   },
   goals:
