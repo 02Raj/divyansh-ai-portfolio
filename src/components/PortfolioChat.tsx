@@ -128,7 +128,9 @@ const formatResponse = (content: string) => {
     "TechPlusNexus",
     "SlantPOS",
     "CiteMind",
+    "Kirana Voice Assistant",
     "citemind",
+    "kirana-voice-assistant",
     "razorpay-clone-backend",
     "techplusnexus.fun",
   ];

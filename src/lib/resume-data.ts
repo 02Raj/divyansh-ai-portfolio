@@ -30,7 +30,7 @@ export const portfolioHighlights = [
     prompt: "Summarize my work experience and years in production",
   },
   {
-    value: "7+",
+    value: "8+",
     label: "Shipped products",
     prompt: "🚀 Recent projects",
   },
@@ -75,6 +75,15 @@ export const resumeData = {
       stack: "Java, Spring Boot, Angular, PostgreSQL, pgvector, JWT, Apache Tika, Spring AI, Gemini, SSE",
       live: "github.com/02Raj/citemind-",
       metrics: ["RAG + citations", "SSE streaming answers", "JWT-secured ingest & chat"],
+    },
+    {
+      name: "Kirana Voice Assistant",
+      period: "Sep 2026",
+      blurb:
+        "Voice-first kirana shop demo: mic → Spring Boot → Sarvam STT/chat/Bulbul TTS → Angular UI; Hindi, Hinglish & English for rates, stock, orders; shopkeeper persona with price list, running total, delivery rules",
+      stack: "Java 17, Spring Boot 3.5, Angular 20, Gradle, Sarvam STT, Sarvam chat, Bulbul TTS",
+      live: "github.com/02Raj/kirana-voice-assistant",
+      metrics: ["Hindi/Hinglish/English voice", "Push-to-talk + order slip UI", "Credit-conscious Sarvam limits"],
     },
     {
       name: "Razorpay Clone Backend",

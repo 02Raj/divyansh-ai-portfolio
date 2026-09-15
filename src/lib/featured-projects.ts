@@ -18,8 +18,8 @@ export type ProjectCard = {
 const FEATURED_ORDER = [
   "SlantPOS",
   "CiteMind",
+  "Kirana Voice Assistant",
   "TechPlusNexus",
-  "Razorpay Clone Backend",
   "TutorPe",
 ];
 

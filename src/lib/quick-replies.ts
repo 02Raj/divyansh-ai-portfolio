@@ -31,16 +31,20 @@ I hold a B.Tech in ECE from Bundelkhand Institute of Engineering and Technology 
    • Overview: Upload PDF/Markdown, retrieve cited chunks, then LLM; insufficient_context if no match
    • Metrics: RAG + citations · SSE streaming · github.com/02Raj/citemind-
 
-3. TechPlusNexus — AI Blog Platform (Apr 2025 – May 2025)
+3. Kirana Voice Assistant — Voice-first kirana demo (Sep 2026)
+   • Tech Stack: Java 17, Spring Boot 3.5, Angular 20, Sarvam STT, Sarvam chat, Bulbul TTS
+   • Overview: Hindi/Hinglish/English — rates, stock, orders via push-to-talk; Gupta Kirana / Ramesh bhai persona
+   • Metrics: Mic → STT → chat → TTS pipeline · github.com/02Raj/kirana-voice-assistant
+
+4. TechPlusNexus — AI Blog Platform (Apr 2025 – May 2025)
    • Tech Stack: React, Spring Boot, MongoDB, Gemini API, AWS
    • Metrics: Full AWS deploy · JWT API · live at techplusnexus.fun
 
-4. Razorpay Clone Backend (2025)
+5. Razorpay Clone Backend (2025)
    • Tech Stack: Spring Boot, PostgreSQL, Spring Data JPA
-   • Overview: Payment gateway-style REST backend inspired by Razorpay
    • Metrics: JPA + PostgreSQL · github.com/02Raj/razorpay-clone-backend
 
-5. TutorPe — Ed-tech SaaS (Apr 2025 – Present)
+6. TutorPe — Ed-tech SaaS (Apr 2025 – Present)
    • Metrics: Live at tutorpe.in · fee tracking · WhatsApp alerts`,
 
   experience: `I'm a Full Stack Developer (Java + Angular) at SlantCo, Noida (Nov 2022 – Present).

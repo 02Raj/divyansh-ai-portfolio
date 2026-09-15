@@ -24,6 +24,16 @@ export function getStaticResumeAnswer(
     return `Here's my GitHub: ${data.github} — you'll find my projects and code there.`;
   }
 
+  if (/\b(kirana voice|kirana-voice|gupta kirana|ramesh bhai)\b/.test(p)) {
+    return `Kirana Voice Assistant — voice-first kirana shop demo (Sep 2026).
+
+Mic → Spring Boot → Sarvam STT → Sarvam chat → Bulbul TTS → Angular UI. Hindi, Hinglish & English for rates, stock, and orders. Kirana-aware persona with price list, running total, and delivery rules.
+
+Stack: Java 17, Spring Boot 3.5, Angular 20, Sarvam (STT, chat, TTS).
+
+Source: https://github.com/02Raj/kirana-voice-assistant`;
+  }
+
   if (
     /\b(prep hub|learn with divyansh|interview prep hub|learn-with-divyansh|divyansh-s-prep)\b/.test(
       p
@@ -73,7 +83,7 @@ export function isResumeRelated(prompt: string): boolean {
   const signals = [
     /\b(resume|cv|portfolio|background|profile|prep hub|learn with divyansh)\b/,
     /\b(skill|stack|tech|technology|framework|language)\b/,
-    /\b(project|slantpos|techplusnexus|tms|pos|blog)\b/,
+    /\b(project|slantpos|techplusnexus|citemind|kirana|razorpay|tms|pos|blog)\b/,
     /\b(experience|work|role|job|career|company|slantco)\b/,
     /\b(current|present|ongoing|latest)\b.*\b(project|work|role)\b/,
     /\b(what are you (working on|building)|working on now)\b/,
