@@ -35,6 +35,16 @@ export function getStaticResumeAnswer(
 I use this alongside my Java/Spring Boot work for interview prep and problem-solving.`;
   }
 
+  if (/\b(kitchenpulse|kitchen pulse|transactional outbox|idempotency-?key)\b/.test(p)) {
+    return `KitchenPulse — event-driven kitchen order microservices (Sep 2026).
+
+Place order → reserve stock synchronously (OpenFeign + Resilience4j) → transactional outbox on PostgreSQL → Redpanda/Kafka → notify-service (retry + DLQ) → kitchen tickets in MongoDB. JWT Spring Cloud Gateway at the edge; Angular 19 POS + kitchen board with signals.
+
+Highlights: Idempotency-Key header (no double stock deduction), polyglot persistence (Postgres orders/outbox + Mongo menu/tickets), no Eureka/Config Server bloat — interview-ready system design sample.
+
+Source: https://github.com/02Raj/kitchenpulse`;
+  }
+
   if (/\b(kirana voice|kirana-voice|gupta kirana|ramesh bhai)\b/.test(p)) {
     return `Kirana Voice Assistant — voice-first kirana shop demo (Sep 2026).
 
@@ -94,7 +104,7 @@ export function isResumeRelated(prompt: string): boolean {
   const signals = [
     /\b(resume|cv|portfolio|background|profile|prep hub|learn with divyansh)\b/,
     /\b(skill|stack|tech|technology|framework|language|leetcode|dsa)\b/,
-    /\b(project|slantpos|techplusnexus|citemind|kirana|razorpay|tms|pos|blog)\b/,
+    /\b(project|slantpos|kitchenpulse|kitchen pulse|techplusnexus|citemind|kirana|razorpay|tms|pos|blog|kafka|redpanda|outbox)\b/,
     /\b(experience|work|role|job|career|company|slantco)\b/,
     /\b(current|present|ongoing|latest)\b.*\b(project|work|role)\b/,
     /\b(what are you (working on|building)|working on now)\b/,

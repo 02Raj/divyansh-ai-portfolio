@@ -16,6 +16,7 @@ export type ProjectCard = {
 };
 
 const FEATURED_ORDER = [
+  "KitchenPulse",
   "SlantPOS",
   "CiteMind",
   "Kirana Voice Assistant",

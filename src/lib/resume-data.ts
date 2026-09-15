@@ -31,7 +31,7 @@ export const portfolioHighlights = [
     prompt: "Summarize my work experience and years in production",
   },
   {
-    value: "8+",
+    value: "9+",
     label: "Shipped products",
     prompt: "🚀 Recent projects",
   },
@@ -56,7 +56,7 @@ export const resumeData = {
   leetcode: leetcodeProfile.profileUrl,
   location: "Noida, Uttar Pradesh",
   get summary() {
-    return `Java Full-Stack Developer, ${getExperienceYears()} yrs. Spring Boot, Java, REST APIs, Angular, React/Next.js. Backend + JPA/Hibernate, responsive UI, cloud-native SaaS products, AI-assisted features, performance-minded, Agile delivery. Active DSA: ${leetcodeProfile.totalSolved}+ LeetCode problems solved (Easy ${leetcodeProfile.easy}, Medium ${leetcodeProfile.medium}, Hard ${leetcodeProfile.hard}).`;
+    return `Java Full-Stack Developer, ${getExperienceYears()} yrs. Spring Boot microservices, Java, REST APIs, Angular, React/Next.js. Production SlantPOS + portfolio samples (KitchenPulse event-driven microservices, CiteMind RAG). Backend + JPA/Hibernate, Kafka/outbox patterns, responsive UI, cloud-native SaaS, AI-assisted features, Agile delivery. Active DSA: ${leetcodeProfile.totalSolved}+ LeetCode (Easy ${leetcodeProfile.easy}, Medium ${leetcodeProfile.medium}, Hard ${leetcodeProfile.hard}).`;
   },
   role: "Full Stack Developer (Java + Angular)",
   company: "SlantCo, Noida",
@@ -69,6 +69,20 @@ export const resumeData = {
     "Agile/Scrum: sprints, reviews, production deploys",
   ],
   projects: [
+    {
+      name: "KitchenPulse",
+      period: "Sep 2026",
+      blurb:
+        "Event-driven kitchen order spine for system-design demos: Angular POS + kitchen board; JWT API gateway; order-service (PostgreSQL + transactional outbox), inventory-service (Mongo menu/stock), notify-service (Kafka consumer, retry/DLQ, tickets); sync Feign + Resilience4j reservations, async Redpanda/Kafka; idempotent orders via Idempotency-Key — no Eureka/Config Server bloat",
+      stack:
+        "Java 17, Spring Boot 3.5, Spring Cloud Gateway, OpenFeign, Resilience4j, JWT, Flyway, PostgreSQL, MongoDB, Redpanda/Kafka, Angular 19, Docker Compose",
+      live: "github.com/02Raj/kitchenpulse",
+      metrics: [
+        "4-service microservices + gateway",
+        "Transactional outbox → Kafka kitchen tickets",
+        "Idempotent orders + circuit breaker on inventory",
+      ],
+    },
     {
       name: "CiteMind",
       period: "Sep 2026",
@@ -149,7 +163,7 @@ export const resumeData = {
     frontend:
       "Angular 19–20 (standalone, signals, lazy routes), Angular Material, PrimeNG, RxJS, NgRx, React, Next.js, HTML5, CSS3, responsive UI",
     backend:
-      "Spring Boot 3.x, Spring MVC, Spring Data JPA, Hibernate, JDBC, REST APIs, Microservices, JWT, SSE, WebSocket, FastAPI",
+      "Spring Boot 3.x, Spring Cloud Gateway, OpenFeign, Resilience4j, Spring MVC, JPA, Hibernate, REST, Microservices, JWT, SSE, WebSocket, Kafka/Redpanda, transactional outbox, FastAPI",
     databases: "PostgreSQL (pgvector / vector search), MySQL, MongoDB, Firebase/Firestore",
     cloud: "AWS (EC2, S3, CloudWatch, IAM, Route 53, Bedrock), Docker, Vercel, GitLab CI/CD",
     ai:
@@ -158,7 +172,7 @@ export const resumeData = {
     dsa: `${leetcodeProfile.displayTotal} LeetCode solved (${leetcodeProfile.easy} Easy, ${leetcodeProfile.medium} Medium, ${leetcodeProfile.hard} Hard); arrays, strings, trees, DP, interview prep`,
   },
   goals:
-    "Build scalable Java/Angular systems; deepen cloud, microservices, and AI-assisted product features. Currently building CloudSaathi — an agentic AI assistant for AWS cloud ops with voice, security audits, and cost monitoring.",
+    "Build scalable Java/Angular systems and event-driven microservices (see KitchenPulse). Deepen cloud, Kafka/outbox patterns, and AI-assisted features. Currently building CloudSaathi — agentic AWS ops assistant with voice, security audits, and cost monitoring.",
 };
 
 export type ResumeData = typeof resumeData;

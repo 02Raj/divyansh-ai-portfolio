@@ -126,6 +126,8 @@ const formatResponse = (content: string) => {
 
   const projectHighlights = [
     "TechPlusNexus",
+    "KitchenPulse",
+    "kitchenpulse",
     "SlantPOS",
     "CiteMind",
     "Kirana Voice Assistant",
@@ -149,6 +151,12 @@ const formatResponse = (content: string) => {
     "JavaScript",
     "TypeScript",
     "Spring Boot",
+    "Spring Cloud Gateway",
+    "OpenFeign",
+    "Resilience4j",
+    "Kafka",
+    "Redpanda",
+    "transactional outbox",
     "Spring MVC",
     "Java",
     "JPA",

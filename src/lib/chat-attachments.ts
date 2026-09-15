@@ -19,7 +19,7 @@ export function attachmentForPrompt(prompt: string): MessageAttachment | undefin
   if (/\bhire\b|\bhiring\b|\brecruit\b/.test(p)) return "hire";
 
   if (
-    /\b(slantpos|techplusnexus|tutorpe|cloudsaathi|doctorflow|clinicdesk|citemind|citmind|kirana|razorpay)\b/.test(
+    /\b(slantpos|kitchenpulse|kitchen pulse|techplusnexus|tutorpe|cloudsaathi|doctorflow|clinicdesk|citemind|citmind|kirana|razorpay)\b/.test(
       p
     )
   ) {
