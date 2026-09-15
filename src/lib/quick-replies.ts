@@ -1,3 +1,4 @@
+import { leetcodeProfile } from "@/lib/leetcode-profile";
 import { getExperienceYears } from "@/lib/resume-data";
 
 /** Static fallbacks — used when Sarvam is down; also seeded into Mongo. */
@@ -7,11 +8,14 @@ export const STATIC_QUICK_REPLIES = {
 
 I've shipped end-to-end features on SlantPOS (restaurant POS with realtime kitchen workflows) and built TechPlusNexus (AI blogging platform on React + Spring Boot, live at techplusnexus.fun) with AWS deploy.
 
+I'm actively practicing DSA on LeetCode — ${leetcodeProfile.totalSolved}+ problems solved (Easy ${leetcodeProfile.easy}, Medium ${leetcodeProfile.medium}, Hard ${leetcodeProfile.hard}): ${leetcodeProfile.profileUrl}
+
 I hold a B.Tech in ECE from Bundelkhand Institute of Engineering and Technology (2017–2021). When I'm not coding, I enjoy cricket and a good plate of biryani. You can check out my code at https://github.com/02Raj.`;
   },
 
   skills: `Here are my core skills:
 
+• DSA / LeetCode: ${leetcodeProfile.totalSolved}+ problems solved (Easy ${leetcodeProfile.easy}, Medium ${leetcodeProfile.medium}, Hard ${leetcodeProfile.hard}) — ${leetcodeProfile.profileUrl}
 • Languages: Java (Core & Advanced), JavaScript, TypeScript, SQL
 • Frontend: Angular 19, Angular Material, PrimeNG, RxJS, NgRx, HTML5, CSS3, responsive UI
 • Backend: Spring Boot, Spring MVC, Spring Data JPA, Hibernate, JDBC, REST APIs, Microservices, JWT

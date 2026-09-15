@@ -1,3 +1,4 @@
+import { leetcodeProfile, leetcodeSummaryLine } from "@/lib/leetcode-profile";
 import { prepHubContextBlock } from "@/lib/prep-hub";
 
 /**
@@ -40,9 +41,9 @@ export const portfolioHighlights = [
     prompt: "Tell me about SlantPOS — stack, modules, and impact",
   },
   {
-    value: "3",
-    label: "Live deployments",
-    prompt: "Which projects are live in production? Include links and metrics",
+    value: leetcodeProfile.displayTotal,
+    label: "LeetCode solved",
+    prompt: "Tell me about my LeetCode and DSA practice — how many problems and difficulty breakdown",
   },
 ] as const;
 
@@ -52,9 +53,10 @@ export const resumeData = {
   phone: "7236998742",
   email: "divyanshraj02@gmail.com",
   github: "https://github.com/02Raj",
+  leetcode: leetcodeProfile.profileUrl,
   location: "Noida, Uttar Pradesh",
   get summary() {
-    return `Java Full-Stack Developer, ${getExperienceYears()} yrs. Spring Boot, Java, REST APIs, Angular, React/Next.js. Backend + JPA/Hibernate, responsive UI, cloud-native SaaS products, AI-assisted features, performance-minded, Agile delivery.`;
+    return `Java Full-Stack Developer, ${getExperienceYears()} yrs. Spring Boot, Java, REST APIs, Angular, React/Next.js. Backend + JPA/Hibernate, responsive UI, cloud-native SaaS products, AI-assisted features, performance-minded, Agile delivery. Active DSA: ${leetcodeProfile.totalSolved}+ LeetCode problems solved (Easy ${leetcodeProfile.easy}, Medium ${leetcodeProfile.medium}, Hard ${leetcodeProfile.hard}).`;
   },
   role: "Full Stack Developer (Java + Angular)",
   company: "SlantCo, Noida",
@@ -150,6 +152,7 @@ export const resumeData = {
     cloud: "AWS (EC2/S3/CloudWatch/IAM/Route53/Bedrock), Docker, Vercel, GitLab CI/CD",
     ai: "RAG, pgvector, Spring AI, Gemini, Amazon Bedrock (Claude), Sarvam AI, Whisper, Amazon Polly, Bolna AI",
     tools: "IntelliJ, VS Code, Postman, Git, GitHub, JIRA",
+    dsa: `${leetcodeProfile.displayTotal} LeetCode solved (${leetcodeProfile.easy} Easy, ${leetcodeProfile.medium} Medium, ${leetcodeProfile.hard} Hard); arrays, strings, trees, DP, interview prep`,
   },
   goals:
     "Build scalable Java/Angular systems; deepen cloud, microservices, and AI-assisted product features. Currently building CloudSaathi — an agentic AI assistant for AWS cloud ops with voice, security audits, and cost monitoring.",
@@ -175,6 +178,7 @@ export function contextForIntent(
         data.summary,
         `${data.role} @ ${data.company} (${data.duration})`,
         `Projects: ${data.projects.map((p) => p.name).join(", ")}`,
+        leetcodeSummaryLine(),
         prepHubContextBlock(),
         data.education,
       ].join("\n");
@@ -186,6 +190,7 @@ export function contextForIntent(
         `DB: ${data.skills.databases}`,
         `Cloud: ${data.skills.cloud}`,
         `AI/ML: ${data.skills.ai}`,
+        `DSA: ${data.skills.dsa}`,
         `Tools: ${data.skills.tools}`,
       ].join("\n");
     case "projects":
@@ -213,6 +218,7 @@ export function contextForIntent(
         `${data.name} | ${data.role} @ ${data.company}`,
         data.summary,
         `Skills: ${data.skills.languages}; ${data.skills.backend}; ${data.skills.frontend}`,
+        leetcodeSummaryLine(),
         `Projects: ${data.projects.map((p) => `${p.name} (${p.stack})`).join("; ")}`,
         prepHubContextBlock(),
       ].join("\n");

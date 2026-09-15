@@ -1,3 +1,4 @@
+import { leetcodeProfile } from "@/lib/leetcode-profile";
 import { prepHub } from "@/lib/prep-hub";
 import type { ResumeData } from "@/lib/resume-data";
 import { getExperienceLabel } from "@/lib/resume-data";
@@ -22,6 +23,16 @@ export function getStaticResumeAnswer(
 
   if (/\b(github|git hub|repo)\b/.test(p)) {
     return `Here's my GitHub: ${data.github} — you'll find my projects and code there.`;
+  }
+
+  if (/\b(leetcode|leet code|dsa|data structures|coding problems|how many problems)\b/.test(p)) {
+    return `I'm actively practicing on LeetCode (${leetcodeProfile.profileUrl}):
+
+• ${leetcodeProfile.totalSolved} problems solved (${leetcodeProfile.displayTotal} on profile)
+• Easy: ${leetcodeProfile.easy} · Medium: ${leetcodeProfile.medium} · Hard: ${leetcodeProfile.hard}
+• Consistency: ${leetcodeProfile.consistencyBadge}
+
+I use this alongside my Java/Spring Boot work for interview prep and problem-solving.`;
   }
 
   if (/\b(kirana voice|kirana-voice|gupta kirana|ramesh bhai)\b/.test(p)) {
@@ -82,7 +93,7 @@ export function isResumeRelated(prompt: string): boolean {
 
   const signals = [
     /\b(resume|cv|portfolio|background|profile|prep hub|learn with divyansh)\b/,
-    /\b(skill|stack|tech|technology|framework|language)\b/,
+    /\b(skill|stack|tech|technology|framework|language|leetcode|dsa)\b/,
     /\b(project|slantpos|techplusnexus|citemind|kirana|razorpay|tms|pos|blog)\b/,
     /\b(experience|work|role|job|career|company|slantco)\b/,
     /\b(current|present|ongoing|latest)\b.*\b(project|work|role)\b/,
